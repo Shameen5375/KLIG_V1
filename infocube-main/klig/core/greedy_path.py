@@ -320,8 +320,8 @@ class GreedyMuAttributor:
                 if k < self.n_steps - 1:
                     inv = 1.0 / (g_mu.abs() + 1e-12)
                     weights = D * inv / (inv.sum() + 1e-12)
-                    weights = weights.clamp(max=float(remaining_steps))
                     delta_mu = weights * (mu_final - mu_curr) / remaining_steps
+                    delta_mu = delta_mu.clamp(-(mu_final - mu_curr).abs(), (mu_final - mu_curr).abs())
                 else:
                     delta_mu = mu_final - mu_curr
 
@@ -435,10 +435,12 @@ class GreedyJointAttributor:
                 if k < self.n_steps - 1:
                     inv_mu     = 1.0 / (g_mu.abs()     + 1e-12)
                     inv_logvar = 1.0 / (g_logvar.abs() + 1e-12)
-                    w_mu     = (D * inv_mu     / (inv_mu.sum()     + 1e-12)).clamp(max=float(remaining_steps))
-                    w_logvar = (D * inv_logvar / (inv_logvar.sum() + 1e-12)).clamp(max=float(remaining_steps))
+                    w_mu     = D * inv_mu     / (inv_mu.sum()     + 1e-12)
+                    w_logvar = D * inv_logvar / (inv_logvar.sum() + 1e-12)
                     delta_mu     = w_mu     * (mu_final     - mu_curr)     / remaining_steps
                     delta_logvar = w_logvar * (logvar_final - logvar_curr) / remaining_steps
+                    delta_mu     = delta_mu.clamp(    -(mu_final     - mu_curr).abs(),     (mu_final     - mu_curr).abs())
+                    delta_logvar = delta_logvar.clamp(-(logvar_final - logvar_curr).abs(), (logvar_final - logvar_curr).abs())
                 else:
                     w_mu = w_logvar = torch.ones_like(g_mu)
                     delta_mu     = mu_final     - mu_curr
