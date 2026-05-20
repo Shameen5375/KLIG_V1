@@ -451,7 +451,9 @@ class GreedyJointAttributor:
                 step_signal.append(float(sig_dm.abs().sum() + sig_dlv.abs().sum()))
 
                 mu_curr = (mu_curr + delta_mu).detach()
-                logvar_curr = (logvar_curr + delta_logvar).detach()
+                # clamp logvar to ≤ 0: greedy weights can overshoot above the prior
+                # std, making model inputs explode and gradients go NaN
+                logvar_curr = (logvar_curr + delta_logvar).clamp(max=0.0).detach()
         finally:
             for p, s in zip(self.model.parameters(), saved):
                 p.requires_grad_(s)
