@@ -134,7 +134,7 @@ class SortedDimPath(DistributionPath):
         n = len(flat)
         order = torch.argsort(flat, descending=True)
         rank = torch.empty(n, device=flat.device)
-        rank[order] = torch.linspace(0.0, 1.0, n, device=flat.device)
+        rank[order] = torch.linspace(1.0, 0.0, n, device=flat.device)
         gamma = (gamma_lo + (gamma_hi - gamma_lo) * rank).reshape(grad_magnitudes.shape)
         return cls(gamma)
 
@@ -318,11 +318,11 @@ class GreedyMuAttributor:
 
                 remaining_steps = self.n_steps - k
                 if k < self.n_steps - 1:
-                    # gradient-weighted advance in μ
-                    weights = D * g_mu.abs() / (g_mu.abs().sum() + 1e-12)
+                    inv = 1.0 / (g_mu.abs() + 1e-12)
+                    weights = D * inv / (inv.sum() + 1e-12)
+                    weights = weights.clamp(max=float(remaining_steps))
                     delta_mu = weights * (mu_final - mu_curr) / remaining_steps
                 else:
-                    # final step: close any residual gap exactly
                     delta_mu = mu_final - mu_curr
 
                 # logvar advances uniformly
@@ -432,22 +432,23 @@ class GreedyJointAttributor:
                 )
 
                 remaining_steps = self.n_steps - k
-                joint_score = g_mu.abs() + g_logvar.abs()
-                raw_weights = D * joint_score / (joint_score.sum() + 1e-12)
-                # cap: w_i > remaining_steps causes overshoot → oscillation → NaN
-                weights = raw_weights.clamp(max=float(remaining_steps))
                 if k < self.n_steps - 1:
-                    delta_mu     = weights * (mu_final     - mu_curr)     / remaining_steps
-                    delta_logvar = weights * (logvar_final - logvar_curr) / remaining_steps
+                    inv_mu     = 1.0 / (g_mu.abs()     + 1e-12)
+                    inv_logvar = 1.0 / (g_logvar.abs() + 1e-12)
+                    w_mu     = (D * inv_mu     / (inv_mu.sum()     + 1e-12)).clamp(max=float(remaining_steps))
+                    w_logvar = (D * inv_logvar / (inv_logvar.sum() + 1e-12)).clamp(max=float(remaining_steps))
+                    delta_mu     = w_mu     * (mu_final     - mu_curr)     / remaining_steps
+                    delta_logvar = w_logvar * (logvar_final - logvar_curr) / remaining_steps
                 else:
+                    w_mu = w_logvar = torch.ones_like(g_mu)
                     delta_mu     = mu_final     - mu_curr
                     delta_logvar = logvar_final - logvar_curr
 
                 attr_mu_sum.add_(g_mu * delta_mu)
                 attr_logvar_sum.add_(g_logvar * delta_logvar)
 
-                sig_dm  = weights * (mu_final     - mu_curr)     / remaining_steps
-                sig_dlv = weights * (logvar_final - logvar_curr) / remaining_steps
+                sig_dm  = w_mu     * (mu_final     - mu_curr)     / remaining_steps
+                sig_dlv = w_logvar * (logvar_final - logvar_curr) / remaining_steps
                 step_signal.append(float(sig_dm.abs().sum() + sig_dlv.abs().sum()))
 
                 mu_curr     = (mu_curr     + delta_mu).detach()
