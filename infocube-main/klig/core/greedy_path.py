@@ -433,27 +433,25 @@ class GreedyJointAttributor:
 
                 remaining_steps = self.n_steps - k
                 joint_score = g_mu.abs() + g_logvar.abs()
-                weights = D * joint_score / (joint_score.sum() + 1e-12)
+                raw_weights = D * joint_score / (joint_score.sum() + 1e-12)
+                # cap: w_i > remaining_steps causes overshoot → oscillation → NaN
+                weights = raw_weights.clamp(max=float(remaining_steps))
                 if k < self.n_steps - 1:
-                    delta_mu = weights * (mu_final - mu_curr) / remaining_steps
+                    delta_mu     = weights * (mu_final     - mu_curr)     / remaining_steps
                     delta_logvar = weights * (logvar_final - logvar_curr) / remaining_steps
                 else:
-                    # exact closure for attribution correctness
-                    delta_mu = mu_final - mu_curr
+                    delta_mu     = mu_final     - mu_curr
                     delta_logvar = logvar_final - logvar_curr
 
                 attr_mu_sum.add_(g_mu * delta_mu)
                 attr_logvar_sum.add_(g_logvar * delta_logvar)
 
-                # use smooth greedy delta for signal (avoids last-step spike)
                 sig_dm  = weights * (mu_final     - mu_curr)     / remaining_steps
                 sig_dlv = weights * (logvar_final - logvar_curr) / remaining_steps
                 step_signal.append(float(sig_dm.abs().sum() + sig_dlv.abs().sum()))
 
-                mu_curr = (mu_curr + delta_mu).detach()
-                # clamp logvar to ≤ 0: greedy weights can overshoot above the prior
-                # std, making model inputs explode and gradients go NaN
-                logvar_curr = (logvar_curr + delta_logvar).clamp(max=0.0).detach()
+                mu_curr     = (mu_curr     + delta_mu).detach()
+                logvar_curr = (logvar_curr + delta_logvar).detach()
         finally:
             for p, s in zip(self.model.parameters(), saved):
                 p.requires_grad_(s)
