@@ -443,7 +443,7 @@ class GreedyJointAttributor:
 
                 attr_mu_sum.add_(g_mu * delta_mu)
                 attr_logvar_sum.add_(g_logvar * delta_logvar)
-                step_signal.append(float((g_mu * delta_mu + g_logvar * delta_logvar).abs().sum().item()))
+                step_signal.append(float((g_mu * delta_mu).abs().sum() + (g_logvar * delta_logvar).abs().sum()))
 
                 mu_curr = (mu_curr + delta_mu).detach()
                 logvar_curr = (logvar_curr + delta_logvar).detach()
