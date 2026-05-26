@@ -8,6 +8,7 @@ from klig.core.greedy_path import (
 )
 from klig.core.diffusion_path import DDiffusionPath
 from klig.core.kl_ig2 import KLIG2Attributor, KLIG2Result
+from klig.core.kl_descent_path import KLDescentPath
 
 __all__ = [
     "KLIntegratedGradients",
@@ -20,4 +21,5 @@ __all__ = [
     "DDiffusionPath",
     "KLIG2Attributor",
     "KLIG2Result",
+    "KLDescentPath",
 ]
