@@ -7,6 +7,7 @@ from klig.core.greedy_path import (
     GreedyAttributionResult,
 )
 from klig.core.diffusion_path import DDiffusionPath
+from klig.core.kl_ig2 import KLIG2Attributor, KLIG2Result
 
 __all__ = [
     "KLIntegratedGradients",
@@ -17,4 +18,6 @@ __all__ = [
     "GreedyJointAttributor",
     "GreedyAttributionResult",
     "DDiffusionPath",
+    "KLIG2Attributor",
+    "KLIG2Result",
 ]
