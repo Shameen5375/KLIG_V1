@@ -60,10 +60,10 @@ class KLDescentPath(DistributionPath):
                    • small (e.g. 2·log(1/256))      → sharp counterfactual
                    • large (e.g. 0.0 = N(·, 1))     → fuzzy / class neighborhood
     T          : Maximum descent steps.
-    step_size  : Step size for the normalized joint (μ, lv) step.
+    step_size  : Learning rate for the natural gradient step (lerp fraction).
+                 Typical range: 0.05–0.2.  With step_size=0.1, convergence
+                 in ~50 steps to within 0.5% of the counterfactual.
     kl_stop    : Early-stop threshold on KL value (sum over dims).
-    grad_clip  : Clip joint gradient L2 norm to this value before
-                 normalization.  None disables.
     """
 
     def __init__(
@@ -73,14 +73,12 @@ class KLDescentPath(DistributionPath):
         T: int = 50,
         step_size: float = 0.01,
         kl_stop: float = 1e-3,
-        grad_clip: float | None = 1.0,
     ) -> None:
         self.mu_cf = mu_cf
         self.lv_cf = lv_cf
         self.T = T
         self.step_size = step_size
         self.kl_stop = kl_stop
-        self.grad_clip = grad_clip
 
         # Filled in by _build() — keyed on id(mu_final) so the integrator's
         # repeated at()/derivatives() calls share one trajectory per attribute().
@@ -128,18 +126,13 @@ class KLDescentPath(DistributionPath):
             if kl_val < self.kl_stop:
                 break
 
-            # joint L2 norm across both (μ, lv) axes — keeps step balanced
-            joint_norm = torch.sqrt(g_mu.pow(2).sum() + g_lv.pow(2).sum())
-
-            if self.grad_clip is not None and joint_norm > self.grad_clip:
-                scale = self.grad_clip / (joint_norm + 1e-12)
-                g_mu = g_mu * scale
-                g_lv = g_lv * scale
-                joint_norm = joint_norm * scale
-
-            denom = joint_norm + 1e-12
-            mu_curr = mu_curr - self.step_size * (g_mu / denom)
-            lv_curr = lv_curr - self.step_size * (g_lv / denom)
+            # Direct lerp toward counterfactual — equivalent to the natural
+            # gradient step for μ (raw g_μ * exp(lv_cf) = μ-μ_cf) and the
+            # only numerically stable choice for lv across large logvar gaps
+            # (raw Hessian ≈ 0 there, making Newton/natural steps blow up).
+            # Guaranteed monotone KL decrease; converges in O(log(1/ε)/lr) steps.
+            mu_curr = mu_curr - self.step_size * (mu_curr - mu_cf)    # lerp toward μ_cf
+            lv_curr = lv_curr - self.step_size * (lv_curr - lv_cf)    # lerp toward lv_cf
 
             traj_mu.append(mu_curr.clone())
             traj_lv.append(lv_curr.clone())
