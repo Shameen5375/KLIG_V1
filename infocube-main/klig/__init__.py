@@ -9,6 +9,7 @@ from klig.core.greedy_path import (
 from klig.core.diffusion_path import DDiffusionPath
 from klig.core.kl_descent_path import KLDescentPath
 from klig.core.rep_descent_path import RepDescentPath, make_phi_from_layer
+from klig.core.ig2_integrator import KLIGSquared, KLIGSquaredResult
 
 __all__ = [
     "KLIntegratedGradients",
@@ -22,4 +23,6 @@ __all__ = [
     "KLDescentPath",
     "RepDescentPath",
     "make_phi_from_layer",
+    "KLIGSquared",
+    "KLIGSquaredResult",
 ]
