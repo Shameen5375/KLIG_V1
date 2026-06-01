@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 """
-Scalar heatmap of (A_x − A_y) — first-component minus second-component
-attribution — on a 100×100 grid for ∇f, IG, KLIG-Adapt, and KL-IG²-Adapt.
+Scalar heatmap of (A_x − A_y) on a 100×100 grid for ∇f, IG, KLIG, KL-IG².
 
 Functions: xor, checkerboard, diagonal_ckb, radial, flat_far_field
 
-KLIG-Adapt:  KLIntegratedGradients + LinearPath, per-query adaptive σ
-             (same algorithm as the image pipeline, SIGMA_F = 0.05 fallback)
-KL-IG²-Adapt: KLIGSquared, φ=identity, x_cf=origin, per-query adaptive σ.
+KLIG:    continuous uniform-path, fully batched (reference implementation).
+KL-IG²: same uniform noise + shrinking half-width as KLIG, but centre follows
+         the GradCF descent trajectory (explicand → counterfactual) per point.
 
 Outputs:
-    results/toy_heatmap_attributions.png   (5 functions × 5 columns)
+    results/toy_heatmap_attributions.png
     results/toy_heatmap_attributions.svg   (with --svg)
 """
 
@@ -33,8 +32,8 @@ OUT.mkdir(exist_ok=True)
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 EXTENT           = 2.0
-GRID_RESOLUTION  = 100       # attribution grid resolution
-HEAT_N           = 240       # function heatmap resolution (background panel)
+GRID_RESOLUTION  = 100
+HEAT_N           = 240
 
 DEFAULT_PERCENTILE = 100.0
 
@@ -44,35 +43,32 @@ for _p in [str(Path(__file__).parent), "infocube-main", "."]:
     if os.path.isdir(os.path.join(_p, "klig")) and _p not in sys.path:
         sys.path.insert(0, _p)
 
-from klig import KLIntegratedGradients, KLIGSquared
-from klig.core.path import LinearPath
+from klig import KLIGSquared
 from klig.image.stopping import find_sigma_stop
 
-# ── KLIG-Adapt / KL-IG²-Adapt hyperparams ────────────────────────────────────
-SIGMA_FIXED       = 0.05     # reference notebook SIGMA_F — do NOT use ImageNet 0.25
-ADAPTIVE_TAU      = 0.95
-ADAPTIVE_N_SAMPLES= 32
-ADAPTIVE_N_ITER   = 12
-ADAPTIVE_FALLBACK = SIGMA_FIXED
-ADAPTIVE_ZERO_THR = 0.05     # |f(x)| below this → use fallback σ
+# ── Hyperparams ───────────────────────────────────────────────────────────────
+KLIG_N_STEPS    = 30
+KLIG_N_MC       = 1365    # continuous_klig: 30×1365 ≈ 40k evals (reference)
+KLIG2_N_MC      = 64      # continuous_klig2: per-point, keep lower
 
-KLIG_N_STEPS     = 30
-KLIG_N_MC        = 32        # MC samples per KLIG-Adapt step
-KLIG_CONT_N_MC   = 1365      # continuous_klig: matches reference (30×1365≈40k evals)
+SIGMA_FIXED     = 0.05    # reference notebook SIGMA_F
+ADAPTIVE_TAU    = 0.95
+ADAPTIVE_N      = 32
+ADAPTIVE_N_ITER = 12
+ADAPTIVE_ZERO   = 0.05
 
-IG2_T            = 15        # max gradient-descent steps for KL-IG²
-IG2_LR_MU        = 0.05
-IG2_LR_LV        = 0.10
-IG2_N_MC_PATH    = 8
-IG2_N_MC_GRAD    = 16
-IG2_LOSS_STOP    = 1e-3
-IG2_LV_CEIL      = 2.0 * math.log(EXTENT * 2 + 1e-9)
+IG2_T           = 15
+IG2_LR_MU       = 0.05
+IG2_LR_LV       = 0.10
+IG2_N_MC_PATH   = 8
+IG2_N_MC_GRAD   = 16
+IG2_LOSS_STOP   = 1e-3
+IG2_LV_CEIL     = 2.0 * math.log(EXTENT * 2 + 1e-9)
 
 
 # ── Toy functions ─────────────────────────────────────────────────────────────
 
 class XOR(nn.Module):
-    """Smooth XOR: tanh(s·x) · tanh(s·y).  Origin is the saddle point."""
     def __init__(self, sharpness: float = 5.0):
         super().__init__()
         self.sharpness = sharpness
@@ -83,7 +79,6 @@ class XOR(nn.Module):
 
 
 class Checkerboard(nn.Module):
-    """cos·cos checkerboard, origin at the centre of a +1 square."""
     def __init__(self, period: float = 1.0, sharpness: float = 15.0):
         super().__init__()
         self.period    = period
@@ -96,7 +91,6 @@ class Checkerboard(nn.Module):
 
 
 class DiagonalCheckerboard(nn.Module):
-    """45°-rotated checkerboard: boundaries along x+y and x-y diagonals."""
     def __init__(self, period: float = 1.0, sharpness: float = 15.0):
         super().__init__()
         self.period    = period
@@ -111,7 +105,6 @@ class DiagonalCheckerboard(nn.Module):
 
 
 class RadialRings(nn.Module):
-    """Cosine of radius, attenuated by a Gaussian envelope."""
     def __init__(self, k_rings: float = 1.0, env_sigma: float = 1.5):
         super().__init__()
         self.k         = k_rings
@@ -124,7 +117,6 @@ class RadialRings(nn.Module):
 
 
 class FlatFarFieldBumps(nn.Module):
-    """≈0 everywhere except narrow, high-amplitude Gaussian bumps near origin."""
     def __init__(self,
                  centers=((0.15, -0.10), (-0.12, 0.18), (0.05, 0.05)),
                  amplitudes=(1.0, -0.85, 0.70),
@@ -137,8 +129,7 @@ class FlatFarFieldBumps(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         diff  = x.unsqueeze(-2) - self.centers
         r2    = (diff ** 2).sum(-1)
-        bumps = torch.exp(-r2 / (2 * self.sigma ** 2))
-        return (bumps * self.amplitudes).sum(-1)
+        return (torch.exp(-r2 / (2 * self.sigma ** 2)) * self.amplitudes).sum(-1)
 
 
 FUNCS = {
@@ -152,22 +143,18 @@ FUNC_NAMES = list(FUNCS.keys())
 
 
 # ── ToyClassifierWrapper ──────────────────────────────────────────────────────
-# Wraps scalar fn → (B,2) logits for KLIGSquared and find_sigma_stop.
+# KLIGSquared needs an nn.Module with parameters() and (B,2) logit output.
 
 class ToyClassifierWrapper(nn.Module):
-    """scalar 2D fn → (B, 2) logits  [f(x)·scale, −f(x)·scale]."""
     def __init__(self, fn: nn.Module, scale: float = 5.0):
         super().__init__()
-        self.fn    = fn
-        self.scale = scale
+        self.fn     = fn
+        self.scale  = scale
         self._dummy = nn.Parameter(torch.zeros(1), requires_grad=False)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         logit = self.fn(x) * self.scale
         return torch.stack([logit, -logit], dim=1)
-
-
-_SCALAR_TARGET = lambda y: y  # KLIntegratedGradients target for raw scalar fn
 
 
 def _target_for_point(fn: nn.Module, x: torch.Tensor) -> int:
@@ -176,19 +163,37 @@ def _target_for_point(fn: nn.Module, x: torch.Tensor) -> int:
     return 0 if f_val >= 0 else 1
 
 
-def _get_sigma_adaptive(clf: ToyClassifierWrapper, fn: nn.Module,
-                         x: torch.Tensor) -> float:
+def _get_sigma(clf: ToyClassifierWrapper, fn: nn.Module,
+               x: torch.Tensor) -> float:
     with torch.no_grad():
         f_val = fn(x.unsqueeze(0)).item()
-    if abs(f_val) < ADAPTIVE_ZERO_THR:
-        return ADAPTIVE_FALLBACK
-    target = 0 if f_val >= 0 else 1
+    if abs(f_val) < ADAPTIVE_ZERO:
+        return SIGMA_FIXED
     return find_sigma_stop(
-        clf, x, target=target,
-        tau=ADAPTIVE_TAU,
-        n_samples=ADAPTIVE_N_SAMPLES,
-        n_iter=ADAPTIVE_N_ITER,
-        sigma_hi=1.0,
+        clf, x, target=(0 if f_val >= 0 else 1),
+        tau=ADAPTIVE_TAU, n_samples=ADAPTIVE_N,
+        n_iter=ADAPTIVE_N_ITER, sigma_hi=1.0,
+    )
+
+
+def _make_klig2(clf: ToyClassifierWrapper, sigma: float) -> KLIGSquared:
+    return KLIGSquared(
+        model=clf,
+        phi=lambda x: x,
+        x_cf=torch.zeros(2, device=DEVICE),
+        T=IG2_T,
+        lr_mu=IG2_LR_MU,
+        lr_lv=IG2_LR_LV,
+        n_mc_path=IG2_N_MC_PATH,
+        n_mc_grad=IG2_N_MC_GRAD,
+        sigma_start=sigma,
+        loss_stop=IG2_LOSS_STOP,
+        lv_floor=2.0 * math.log(sigma),
+        lv_ceil=IG2_LV_CEIL,
+        mu_min=-EXTENT,
+        mu_max=EXTENT,
+        clamp_samples=True,
+        device=DEVICE,
     )
 
 
@@ -213,43 +218,35 @@ def evaluate_heat(fn: nn.Module, n: int = HEAT_N,
 # ── Attribution methods ───────────────────────────────────────────────────────
 
 def gradient_field(fn: nn.Module, points: np.ndarray) -> np.ndarray:
-    """∇f at all query points — single batched autograd call."""
+    """∇f — single batched autograd call."""
     pts = torch.tensor(points, dtype=torch.float32, device=DEVICE).requires_grad_(True)
-    y   = fn(pts)
-    g   = torch.autograd.grad(y.sum(), pts)[0]
+    g   = torch.autograd.grad(fn(pts).sum(), pts)[0]
     return g.detach().cpu().numpy()
 
 
 def integrated_gradients(fn: nn.Module, points: np.ndarray,
                           n_steps: int = 64) -> np.ndarray:
-    """IG from (0,0) baseline — midpoint rule, batched over query points."""
-    pts      = torch.tensor(points, dtype=torch.float32, device=DEVICE)
-    B, D     = pts.shape
-    baseline = torch.zeros(D, device=DEVICE)
-    delta    = pts - baseline
-    attr     = torch.zeros(B, D, device=DEVICE)
+    """IG from (0,0) baseline — midpoint rule, batched."""
+    pts  = torch.tensor(points, dtype=torch.float32, device=DEVICE)
+    attr = torch.zeros_like(pts)
     for k in range(n_steps):
         alpha = (k + 0.5) / n_steps
-        x_a   = (baseline + alpha * delta).requires_grad_(True)
-        y     = fn(x_a)
-        g     = torch.autograd.grad(y.sum(), x_a)[0]
-        attr += g.detach() * delta / n_steps
+        x_a   = (alpha * pts).requires_grad_(True)
+        g     = torch.autograd.grad(fn(x_a).sum(), x_a)[0]
+        attr += g.detach() * pts / n_steps
     return attr.detach().cpu().numpy()
 
 
 def continuous_klig(fn: nn.Module, points: np.ndarray,
-                    n_steps: int = KLIG_N_STEPS,
-                    n_mc:    int = KLIG_CONT_N_MC,
+                    n_steps: int  = KLIG_N_STEPS,
+                    n_mc:    int  = KLIG_N_MC,
                     extent:  float = EXTENT,
                     eps:     float = 0.02,
                     seed:    int   = 0) -> np.ndarray:
-    """Continuous uniform-path KLIG, fully batched over all query points.
+    """Continuous uniform-path KLIG, fully batched (reference implementation).
 
-    Path (per query point x_q, independent per-feature uniform):
-        μ_t  = t · x_q                            (centre: 0 → x_q)
-        hw_t = extent·(1 − t) + eps·t             (half-width: EXTENT → eps)
-    At t=0: U(−extent, extent)²  — broad background
-    At t=1: U(x_q − eps, x_q + eps)²  — near-delta at x_q
+    Path: μ_t = t·x_q  (centre: 0→x_q),  hw_t = extent·(1−t) + eps·t  (broad→tight)
+    Samples: x_samp = μ_t + hw_t·(2u−1),  u ~ Uniform[0,1]
     """
     torch.manual_seed(seed)
     pts  = torch.tensor(points, dtype=torch.float32, device=DEVICE)
@@ -266,8 +263,7 @@ def continuous_klig(fn: nn.Module, points: np.ndarray,
         x_samp = mu_t.unsqueeze(1) + hw_t * (2.0 * u - 1.0)
         x_flat = x_samp.reshape(B * n_mc, D).requires_grad_(True)
 
-        y     = fn(x_flat)
-        grads = torch.autograd.grad(y.sum(), x_flat)[0]
+        grads = torch.autograd.grad(fn(x_flat).sum(), x_flat)[0]
         grads = grads.reshape(B, n_mc, D).detach()
 
         dE_dmu = grads.mean(1)
@@ -278,107 +274,72 @@ def continuous_klig(fn: nn.Module, points: np.ndarray,
 
 
 def continuous_klig2(fn: nn.Module, points: np.ndarray,
-                     n_steps: int  = KLIG_N_STEPS,
-                     n_mc:    int  = KLIG_CONT_N_MC,
-                     sigma:   float = SIGMA_FIXED,
-                     seed:    int   = 0) -> np.ndarray:
-    """Continuous KL-IG², fully batched — mirrors continuous_klig structure.
+                     clf: ToyClassifierWrapper,
+                     n_mc:   int   = KLIG2_N_MC,
+                     extent: float = EXTENT,
+                     eps:    float = 0.02,
+                     seed:   int   = 0) -> np.ndarray:
+    """Continuous KL-IG² — same uniform noise + shrinking half-width as KLIG,
+    but centre follows the GradCF descent trajectory instead of 0→x_q.
 
-    Path (linear in μ-space, fixed σ):
-        μ_t  = (1 − t) · x_q        (explicand → origin as t: 0 → 1)
-        σ_t  = sigma                 (constant — same as SIGMA_FIXED)
-    Samples: x_samp = μ_t + σ · ε,  ε ~ N(0, I)
+    Phase 1: descend L(μ,lv)=E[||φ(x)−φ(x_cf)||²] from explicand → traj_mu.
+    Phase 2: integrate along traj_mu with uniform noise:
+        x_samp_k = traj_mu[k] + hw_k·(2u−1)
+        hw_k = extent·(1−k/K) + eps·(k/K)   (broad→tight, same schedule as KLIG)
 
-    Attribution (backward-displacement chain rule):
-        attr_i = Σ_k  E[∂f/∂x_i(x_samp_k)]  ·  dμ_k_i
-    where  dμ_k_i = μ_{t_k}_i − μ_{t_{k+1}}_i = x_q_i / n_steps
-
-    Completeness: Σ attr_i ≈ f(x_q) − f(0)  as σ → 0.
+    attr_i = Σ_k  E[∂f/∂x_i]·dμ_k_i  +  E[(2u_i−1)·∂f/∂x_i]·dhw_k
+    where  dμ_k = traj_mu[k] − traj_mu[k+1]  (backward displacement, same as IG²)
     """
     torch.manual_seed(seed)
-    pts  = torch.tensor(points, dtype=torch.float32, device=DEVICE)
-    B, D = pts.shape
-    dt   = 1.0 / n_steps
-    attr = torch.zeros(B, D, device=DEVICE)
-
-    for k in range(n_steps):
-        t      = (k + 0.5) * dt
-        mu_t   = (1.0 - t) * pts                            # (B, D)
-
-        eps    = torch.randn(B, n_mc, D, device=DEVICE)
-        x_samp = mu_t.unsqueeze(1) + sigma * eps            # (B, n_mc, D)
-        x_flat = x_samp.reshape(B * n_mc, D).requires_grad_(True)
-
-        y     = fn(x_flat)
-        grads = torch.autograd.grad(y.sum(), x_flat)[0]
-        grads = grads.reshape(B, n_mc, D).detach()
-
-        dE_dmu = grads.mean(1)                              # (B, D)
-        attr  += dE_dmu * pts * dt                          # dμ_k = pts * dt
-
-    return attr.detach().cpu().numpy()
-
-
-def klig_adapt_field(fn: nn.Module, points: np.ndarray,
-                     clf: ToyClassifierWrapper) -> np.ndarray:
-    """KLIG-Adapt: KLIntegratedGradients + LinearPath + per-point adaptive σ."""
     attr_ = np.zeros_like(points)
-    for i in range(len(points)):
-        x     = torch.tensor(points[i], dtype=torch.float32, device=DEVICE)
-        sigma = _get_sigma_adaptive(clf, fn, x)
-        ig    = KLIntegratedGradients(
-            fn, n_steps=KLIG_N_STEPS, n_samples=KLIG_N_MC,
-            sigma_final=sigma, path=LinearPath(), device=DEVICE,
-        )
-        r = ig.attribute(x, target=_SCALAR_TARGET)
-        attr_[i] = r.attr.detach().cpu().numpy()
-    return attr_
 
-
-def _make_klig2(clf: ToyClassifierWrapper, sigma: float) -> KLIGSquared:
-    return KLIGSquared(
-        model=clf,
-        phi=lambda x: x,
-        x_cf=torch.zeros(2, device=DEVICE),
-        T=IG2_T,
-        lr_mu=IG2_LR_MU,
-        lr_lv=IG2_LR_LV,
-        n_mc_path=IG2_N_MC_PATH,
-        n_mc_grad=IG2_N_MC_GRAD,
-        sigma_start=sigma,
-        loss_stop=IG2_LOSS_STOP,
-        lv_floor=2.0 * math.log(sigma),
-        lv_ceil=IG2_LV_CEIL,
-        mu_min=-EXTENT,
-        mu_max=EXTENT,
-        clamp_samples=True,
-        device=DEVICE,
-    )
-
-
-def klig2_adapt_field(fn: nn.Module, points: np.ndarray,
-                      clf: ToyClassifierWrapper) -> np.ndarray:
-    """KL-IG²-Adapt: KLIGSquared + per-point adaptive σ. Returns attr_mu."""
-    attr_ = np.zeros_like(points)
     for i in range(len(points)):
         x      = torch.tensor(points[i], dtype=torch.float32, device=DEVICE)
-        sigma  = _get_sigma_adaptive(clf, fn, x)
+        sigma  = _get_sigma(clf, fn, x)
         target = _target_for_point(fn, x)
-        ig2    = _make_klig2(clf, sigma)
-        r      = ig2.attribute(x, target=target)
-        attr_[i] = r.attr_mu.detach().cpu().numpy()
+
+        # Phase 1: get GradCF trajectory
+        r       = _make_klig2(clf, sigma).attribute(x, target=target)
+        traj_mu = [t.to(DEVICE).detach() for t in r.traj_mu]
+        K       = len(traj_mu) - 1
+        if K == 0:
+            continue
+
+        # Phase 2: integrate with uniform noise along trajectory
+        attr_i = torch.zeros_like(x)
+        D      = x.shape[0]
+
+        for k in range(K):
+            hw_k  = extent * (1.0 - k / K)       + eps * (k / K)
+            hw_k1 = extent * (1.0 - (k + 1) / K) + eps * ((k + 1) / K)
+            dhw_k = hw_k - hw_k1                  # positive (half-width shrinks)
+
+            mu_k  = traj_mu[k]
+            dmu_k = (traj_mu[k] - traj_mu[k + 1]).detach()
+
+            u      = torch.rand(n_mc, D, device=DEVICE)
+            x_samp = mu_k.unsqueeze(0) + hw_k * (2.0 * u - 1.0)
+            x_flat = x_samp.requires_grad_(True)
+
+            grads  = torch.autograd.grad(fn(x_flat).sum(), x_flat)[0].detach()
+
+            dE_dmu = grads.mean(0)
+            dE_dhw = ((2.0 * u - 1.0) * grads).mean(0)
+
+            attr_i += dE_dmu * dmu_k + dE_dhw * dhw_k
+
+        attr_[i] = attr_i.detach().cpu().numpy()
+
     return attr_
 
 
 # ── Methods registry ──────────────────────────────────────────────────────────
 
 METHODS = [
-    ("∇f",           "grad"),
-    ("IG",            "ig"),
-    ("KLIG",          "klig"),
-    ("KL-IG²",        "klig2_cont"),
-    ("KLIG-Adapt",    "klig_adapt"),
-    ("KL-IG²-Adapt",  "klig2_adapt"),
+    ("∇f",     "grad"),
+    ("IG",     "ig"),
+    ("KLIG",   "klig"),
+    ("KL-IG²", "klig2"),
 ]
 
 
@@ -397,13 +358,11 @@ def compute_all(n: int = GRID_RESOLUTION) -> dict[str, np.ndarray]:
               flush=True)
         t0 = time()
 
-        data[f"{name}_heat"]         = evaluate_heat(fn)
-        data[f"{name}_grad"]         = gradient_field(fn, points)
-        data[f"{name}_ig"]           = integrated_gradients(fn, points)
-        data[f"{name}_klig"]         = continuous_klig(fn, points)
-        data[f"{name}_klig2_cont"]   = continuous_klig2(fn, points)
-        data[f"{name}_klig_adapt"]   = klig_adapt_field(fn, points, clf)
-        data[f"{name}_klig2_adapt"]  = klig2_adapt_field(fn, points, clf)
+        data[f"{name}_heat"]  = evaluate_heat(fn)
+        data[f"{name}_grad"]  = gradient_field(fn, points)
+        data[f"{name}_ig"]    = integrated_gradients(fn, points)
+        data[f"{name}_klig"]  = continuous_klig(fn, points)
+        data[f"{name}_klig2"] = continuous_klig2(fn, points, clf)
 
         print(f"  done in {time() - t0:.1f}s")
 
@@ -418,7 +377,6 @@ def render(data: dict[str, np.ndarray],
            percentile: float    = DEFAULT_PERCENTILE,
            min_ref: float       = 0.1,
            extra_formats: tuple = ()) -> None:
-    """One figure: rows = functions, cols = f heatmap + attribution diff panels."""
     nrows = len(FUNC_NAMES)
     ncols = 1 + len(METHODS)
     fig, axes = plt.subplots(nrows, ncols,
@@ -430,7 +388,6 @@ def render(data: dict[str, np.ndarray],
         heat = data[f"{name}_heat"]
         vmax = max(1e-6, float(np.abs(heat).max()))
 
-        # col 0: function heatmap
         ax = axes[ri, 0]
         im = ax.imshow(heat, extent=[-EXTENT, EXTENT, -EXTENT, EXTENT],
                        origin="lower", cmap="RdBu_r", vmin=-vmax, vmax=vmax)
@@ -440,9 +397,8 @@ def render(data: dict[str, np.ndarray],
         if ri == 0:
             ax.set_title("f", fontsize=11)
 
-        # cols 1+: A_x − A_y diff heatmaps
         for ci, (mname, key) in enumerate(METHODS, start=1):
-            attrs = data[f"{name}_{key}"]          # (N², 2)
+            attrs = data[f"{name}_{key}"]
             diff  = (attrs[:, 0] - attrs[:, 1]).reshape(n, n)
             ref   = (float(np.percentile(np.abs(diff), percentile))
                      if percentile < 100 else float(np.abs(diff).max()))
@@ -465,7 +421,7 @@ def render(data: dict[str, np.ndarray],
     fig.suptitle(
         f"A_x − A_y attribution diff  ({n}×{n} grid, "
         f"±pct{percentile:g}|A_x−A_y| per panel; "
-        f"KLIG/KL-IG² σ_fallback={SIGMA_FIXED})",
+        f"KLIG/KL-IG² background = Unif[−{EXTENT}, {EXTENT}]²)",
         fontsize=11,
     )
     plt.tight_layout(rect=[0, 0.01, 1, 0.96])
@@ -483,16 +439,10 @@ def render(data: dict[str, np.ndarray],
 def main() -> None:
     p = argparse.ArgumentParser(
         description="Heatmap attributions for 5 toy 2D functions.")
-    p.add_argument("--percentile", type=float, default=DEFAULT_PERCENTILE,
-                   help="Per-panel |A_x−A_y| percentile for colour scale "
-                        "(100 = max, default)")
-    p.add_argument("--min-ref", type=float, default=0.1,
-                   help="Floor on per-panel colour range (prevents near-zero "
-                        "panels from magnifying noise; default 0.1)")
-    p.add_argument("--svg", action="store_true",
-                   help="Also save output as SVG")
-    p.add_argument("--grid-resolution", type=int, default=GRID_RESOLUTION,
-                   help=f"Attribution grid resolution (default {GRID_RESOLUTION})")
+    p.add_argument("--percentile", type=float, default=DEFAULT_PERCENTILE)
+    p.add_argument("--min-ref",    type=float, default=0.1)
+    p.add_argument("--svg",        action="store_true")
+    p.add_argument("--grid-resolution", type=int, default=GRID_RESOLUTION)
     args = p.parse_args()
 
     data = compute_all(n=args.grid_resolution)
