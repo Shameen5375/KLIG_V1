@@ -277,6 +277,48 @@ def continuous_klig(fn: nn.Module, points: np.ndarray,
     return attr.detach().cpu().numpy()
 
 
+def continuous_klig2(fn: nn.Module, points: np.ndarray,
+                     n_steps: int  = KLIG_N_STEPS,
+                     n_mc:    int  = KLIG_CONT_N_MC,
+                     sigma:   float = SIGMA_FIXED,
+                     seed:    int   = 0) -> np.ndarray:
+    """Continuous KL-IG², fully batched — mirrors continuous_klig structure.
+
+    Path (linear in μ-space, fixed σ):
+        μ_t  = (1 − t) · x_q        (explicand → origin as t: 0 → 1)
+        σ_t  = sigma                 (constant — same as SIGMA_FIXED)
+    Samples: x_samp = μ_t + σ · ε,  ε ~ N(0, I)
+
+    Attribution (backward-displacement chain rule):
+        attr_i = Σ_k  E[∂f/∂x_i(x_samp_k)]  ·  dμ_k_i
+    where  dμ_k_i = μ_{t_k}_i − μ_{t_{k+1}}_i = x_q_i / n_steps
+
+    Completeness: Σ attr_i ≈ f(x_q) − f(0)  as σ → 0.
+    """
+    torch.manual_seed(seed)
+    pts  = torch.tensor(points, dtype=torch.float32, device=DEVICE)
+    B, D = pts.shape
+    dt   = 1.0 / n_steps
+    attr = torch.zeros(B, D, device=DEVICE)
+
+    for k in range(n_steps):
+        t      = (k + 0.5) * dt
+        mu_t   = (1.0 - t) * pts                            # (B, D)
+
+        eps    = torch.randn(B, n_mc, D, device=DEVICE)
+        x_samp = mu_t.unsqueeze(1) + sigma * eps            # (B, n_mc, D)
+        x_flat = x_samp.reshape(B * n_mc, D).requires_grad_(True)
+
+        y     = fn(x_flat)
+        grads = torch.autograd.grad(y.sum(), x_flat)[0]
+        grads = grads.reshape(B, n_mc, D).detach()
+
+        dE_dmu = grads.mean(1)                              # (B, D)
+        attr  += dE_dmu * pts * dt                          # dμ_k = pts * dt
+
+    return attr.detach().cpu().numpy()
+
+
 def klig_adapt_field(fn: nn.Module, points: np.ndarray,
                      clf: ToyClassifierWrapper) -> np.ndarray:
     """KLIG-Adapt: KLIntegratedGradients + LinearPath + per-point adaptive σ."""
@@ -334,6 +376,7 @@ METHODS = [
     ("∇f",           "grad"),
     ("IG",            "ig"),
     ("KLIG",          "klig"),
+    ("KL-IG²",        "klig2_cont"),
     ("KLIG-Adapt",    "klig_adapt"),
     ("KL-IG²-Adapt",  "klig2_adapt"),
 ]
@@ -354,12 +397,13 @@ def compute_all(n: int = GRID_RESOLUTION) -> dict[str, np.ndarray]:
               flush=True)
         t0 = time()
 
-        data[f"{name}_heat"]        = evaluate_heat(fn)
-        data[f"{name}_grad"]        = gradient_field(fn, points)
-        data[f"{name}_ig"]          = integrated_gradients(fn, points)
-        data[f"{name}_klig"]        = continuous_klig(fn, points)
-        data[f"{name}_klig_adapt"]  = klig_adapt_field(fn, points, clf)
-        data[f"{name}_klig2_adapt"] = klig2_adapt_field(fn, points, clf)
+        data[f"{name}_heat"]         = evaluate_heat(fn)
+        data[f"{name}_grad"]         = gradient_field(fn, points)
+        data[f"{name}_ig"]           = integrated_gradients(fn, points)
+        data[f"{name}_klig"]         = continuous_klig(fn, points)
+        data[f"{name}_klig2_cont"]   = continuous_klig2(fn, points)
+        data[f"{name}_klig_adapt"]   = klig_adapt_field(fn, points, clf)
+        data[f"{name}_klig2_adapt"]  = klig2_adapt_field(fn, points, clf)
 
         print(f"  done in {time() - t0:.1f}s")
 
