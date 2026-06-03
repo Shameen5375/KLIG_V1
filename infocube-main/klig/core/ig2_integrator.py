@@ -62,7 +62,7 @@ class KLIGSquaredResult:
     target: int = -1
 
     def completeness_check(self) -> float:
-        """sum(attr) ≈ E[F(explicand)] - E[F(GradCF)]."""
+        """sum(attr) ≈ E[F(explicand)] − E[F(GradCF)]  (should be > 0)."""
         return float(self.attr.sum().item())
 
 
@@ -183,8 +183,9 @@ class KLIGSquared:
             for k in iterator:
                 mu_k  = traj_mu[k]
                 lv_k  = traj_lv[k]
-                dmu_k = traj_mu[k + 1] - traj_mu[k]   # descent displacement
-                dlv_k = traj_lv[k + 1] - traj_lv[k]
+                # IG² uses (x_k − x_{k+1}), i.e. backward displacement, so negate
+                dmu_k = traj_mu[k] - traj_mu[k + 1]
+                dlv_k = traj_lv[k] - traj_lv[k + 1]
 
                 g_mu, g_lv = self._eval_gradients(mu_k, lv_k, x_shape, objective_fn)
 
