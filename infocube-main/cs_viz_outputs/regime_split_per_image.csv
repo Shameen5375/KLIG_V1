@@ -1,0 +1,460 @@
+idx,y1,y1_label,category,ratio,regime
+0,431,bassinet,other,2.2903339804600322,spatial
+1,582,grocery store,other,0.8444321326433252,spatial
+2,578,gown,clothing,1.0812958376570292,spatial
+3,664,monitor,other,1.1026038233758877,spatial
+4,597,holster,other,1.5440762809842565,spatial
+5,577,gong,other,0.37749257380350665,featural
+6,542,drumstick,instrument,1.932835164783296,spatial
+7,546,electric guitar,instrument,1.9457032743106368,spatial
+8,546,electric guitar,instrument,4.689508445495357,spatial
+9,543,dumbbell,other,1.7554516174245702,spatial
+10,431,bassinet,other,1.052366276499688,spatial
+11,509,confectionery,other,2.6298503243475304,spatial
+12,727,planetarium,other,1.1494516985539027,spatial
+13,776,sax,instrument,1.2872005613096946,spatial
+14,519,crate,other,6.24494588910203,spatial
+15,566,French horn,other,2.239967900234546,spatial
+16,705,passenger car,vehicle,5.615137398205477,spatial
+17,578,gown,clothing,2.7882603036295888,spatial
+18,550,espresso maker,food,2.058650994441645,spatial
+19,524,cuirass,other,0.414903078798751,featural
+20,511,convertible,other,5.977386575242558,spatial
+21,543,dumbbell,other,2.2069321822637797,spatial
+22,472,canoe,vehicle,1.3069036844407818,spatial
+23,602,horizontal bar,other,1.1487991462309504,spatial
+24,865,toyshop,other,1.7036674956384144,spatial
+25,579,grand piano,instrument,1.9500163571162572,spatial
+26,598,home theater,other,1.0483707789340337,spatial
+27,526,desk,furniture,1.1333535789225662,spatial
+28,410,apiary,other,2.5844001066471027,spatial
+29,766,rotisserie,other,6.505140991815431,spatial
+30,505,coffeepot,other,0.20194603884122642,featural
+31,585,hair spray,other,1.0201295300408824,spatial
+32,443,bib,other,8.359471219047824,spatial
+33,473,can opener,other,1.637775881414579,spatial
+34,511,convertible,other,4.808301560385133,spatial
+35,532,dining table,furniture,2.5886238135256625,spatial
+36,431,bassinet,other,1.1606500919932332,spatial
+37,584,hair slide,other,0.7729338035392698,spatial
+38,516,cradle,furniture,1.191985129484456,spatial
+39,590,hand-held computer,other,1.6246245626016087,spatial
+40,531,digital watch,other,0.7183675483269397,spatial
+41,563,fountain pen,other,1.7274103018647837,spatial
+42,536,dock,other,0.9350129722910435,spatial
+43,595,harvester,other,0.8324857111952845,spatial
+44,810,space bar,other,1.3735974981589187,spatial
+45,648,medicine chest,other,3.7478574569240317,spatial
+46,549,envelope,other,3.214871481079803,spatial
+47,577,gong,other,0.24640807541688642,featural
+48,601,hoopskirt,other,0.8860139902155308,spatial
+49,488,chain,other,4.5797085665328305,spatial
+50,409,analog clock,other,5.595384122082975,spatial
+51,543,dumbbell,other,2.8691574309997536,spatial
+52,530,digital clock,other,1.5447000308965315,spatial
+53,432,bassoon,other,2.0829738266161253,spatial
+54,564,four-poster,other,1.6718436143785267,spatial
+55,508,computer keyboard,other,1.5250004428218198,spatial
+56,702,parallel bars,other,0.35119696813151485,featural
+57,755,radio telescope,other,3.210347293933859,spatial
+58,548,entertainment center,other,2.296269952056696,spatial
+59,866,tractor,other,0.8294177299046044,spatial
+60,402,acoustic guitar,instrument,2.3333596693267737,spatial
+61,508,computer keyboard,other,1.836899131176421,spatial
+62,527,desktop computer,furniture,2.369458659460572,spatial
+63,548,entertainment center,other,0.7415194792874497,spatial
+64,567,frying pan,other,2.9002216188046153,spatial
+65,446,binder,other,3.2084018998000423,spatial
+66,969,eggnog,other,8.010818417953844,spatial
+67,593,harmonica,other,6.106377447082794,spatial
+68,529,diaper,animal,4.6050534923167055,spatial
+69,577,gong,other,0.5253732274772892,featural
+70,524,cuirass,other,1.021741865959654,spatial
+71,572,goblet,other,1.6248181999701206,spatial
+72,531,digital watch,other,1.0144432598122395,spatial
+73,529,diaper,animal,9.192466528744806,spatial
+74,529,diaper,animal,2.391997301860847,spatial
+75,543,dumbbell,other,0.9755650423632259,spatial
+76,605,iPod,other,1.9487731498957062,spatial
+77,582,grocery store,other,1.6919959844671288,spatial
+78,589,hand blower,other,6.391383895855936,spatial
+79,817,sports car,vehicle,2.5083080539376974,spatial
+80,629,lipstick,other,1.8317284047345674,spatial
+81,531,digital watch,other,0.9110715378790426,spatial
+82,461,breastplate,other,0.888775744372286,spatial
+83,473,can opener,other,2.211748412544815,spatial
+84,600,hook,other,1.5072559814041322,spatial
+85,846,table lamp,furniture,1.8907915367518202,spatial
+86,477,carpenter's kit,vehicle,0.9672448916284205,spatial
+87,409,analog clock,other,1.383482324280065,spatial
+88,599,honeycomb,other,2.843838436895405,spatial
+89,543,dumbbell,other,3.4456454297856958,spatial
+90,776,sax,instrument,4.828182409917504,spatial
+91,860,tobacco shop,other,2.8743377315341783,spatial
+92,543,dumbbell,other,1.6150202923634172,spatial
+93,743,prison,other,1.6708864343235315,spatial
+94,505,coffeepot,other,1.705871333312928,spatial
+95,875,trombone,other,0.0728264537533667,featural
+96,559,folding chair,furniture,6.42605563853583,spatial
+97,541,drum,instrument,0.631222427315524,spatial
+98,500,cliff dwelling,other,1.8641757021393874,spatial
+99,516,cradle,furniture,4.55934706928023,spatial
+100,559,folding chair,furniture,9.769172723471893,spatial
+101,601,hoopskirt,other,7.696877070972318,spatial
+102,523,crutch,other,2.2835832735450254,spatial
+103,603,horse cart,animal,2.0877771302927917,spatial
+104,634,lumbermill,other,3.447717876648181,spatial
+105,577,gong,other,5.472836581346769,spatial
+106,606,iron,other,12.72434828975748,spatial
+107,848,tape player,animal,3.0620034006515846,spatial
+108,817,sports car,vehicle,0.8105316199999082,spatial
+109,553,file,other,0.9222701620922547,spatial
+110,461,breastplate,other,0.9204153080649237,spatial
+111,717,pickup,other,3.057794001153486,spatial
+112,595,harvester,other,1.1009152029377205,spatial
+113,582,grocery store,other,1.2936601072934544,spatial
+114,535,disk brake,other,1.114849647075515,spatial
+115,735,poncho,other,2.202558484035684,spatial
+116,750,quilt,other,2.2017842539674284,spatial
+117,431,bassinet,other,0.8377874155893327,spatial
+118,511,convertible,other,3.3660871241814547,spatial
+119,570,gasmask,clothing,0.6377318877071618,spatial
+120,389,barracouta,animal,2.9939198138177443,spatial
+121,505,coffeepot,other,0.491998004801236,featural
+122,461,breastplate,other,3.1230679186240566,spatial
+123,550,espresso maker,food,0.8999462989919822,spatial
+124,865,toyshop,other,1.1070862246436737,spatial
+125,600,hook,other,2.5239771052607702,spatial
+126,577,gong,other,0.35327856913557387,featural
+127,577,gong,other,0.43503601680275605,featural
+128,875,trombone,other,1.093677953506523,spatial
+129,526,desk,furniture,0.5789317650283262,featural
+130,578,gown,clothing,1.0406936090108678,spatial
+131,461,breastplate,other,0.7625453702963133,spatial
+132,526,desk,furniture,0.5951938978199772,featural
+133,602,horizontal bar,other,1.3755677305030223,spatial
+134,431,bassinet,other,1.5853384207322714,spatial
+135,533,dishrag,other,7.161885256105083,spatial
+136,536,dock,other,1.3779906849468997,spatial
+137,851,television,other,1.0067163632092229,spatial
+138,838,sunscreen,other,0.5254845695581043,featural
+139,596,hatchet,clothing,0.513631699128741,featural
+140,548,entertainment center,other,3.162807232341797,spatial
+141,555,fire engine,other,1.5562955027846606,spatial
+142,513,cornet,other,0.7304841065104022,spatial
+143,509,confectionery,other,5.536411597238741,spatial
+144,558,flute,instrument,3.733239390638229,spatial
+145,516,cradle,furniture,1.11771225699527,spatial
+146,603,horse cart,animal,1.159654771343103,spatial
+147,505,coffeepot,other,1.4665123938365165,spatial
+148,501,cloak,other,2.560818961213733,spatial
+149,421,bannister,other,2.2409101456631437,spatial
+150,705,passenger car,vehicle,3.006382441934576,spatial
+151,546,electric guitar,instrument,0.914727980888578,spatial
+152,441,beer glass,animal,1.9618072785865566,spatial
+153,966,red wine,food,0.4008565988910843,featural
+154,494,chime,other,0.44121111803701185,featural
+155,567,frying pan,other,3.4948264198722456,spatial
+156,527,desktop computer,furniture,0.9065716804182479,spatial
+157,536,dock,other,2.627799025881639,spatial
+158,531,digital watch,other,1.8315637245345038,spatial
+159,497,church,other,1.7162573400825885,spatial
+160,595,harvester,other,0.8249516835896017,spatial
+161,587,hammer,other,5.068751979029393,spatial
+162,607,jack-o'-lantern,animal,7.394677656024519,spatial
+163,503,cocktail shaker,animal,2.079971879921159,spatial
+164,582,grocery store,other,3.5300980470673253,spatial
+165,543,dumbbell,other,2.1983192642093328,spatial
+166,578,gown,clothing,1.169720532398933,spatial
+167,599,honeycomb,other,1.7599598390437536,spatial
+168,494,chime,other,0.15235341721027,featural
+169,774,sandal,clothing,1.966872597082941,spatial
+170,652,military uniform,other,0.6919264416501337,spatial
+171,502,clog,other,2.916956896128131,spatial
+172,577,gong,other,0.2466032343727948,featural
+173,519,crate,other,9.007401812184803,spatial
+174,363,armadillo,animal,4.125768999737752,spatial
+175,762,restaurant,animal,1.5850031069122021,spatial
+176,462,broom,other,2.432887880558573,spatial
+177,598,home theater,other,0.8019733515262378,spatial
+178,505,coffeepot,other,0.9528373015078508,spatial
+179,520,crib,furniture,4.515790535275165,spatial
+180,550,espresso maker,food,2.8090177338714217,spatial
+181,689,overskirt,other,0.5283817266492188,featural
+182,561,forklift,other,0.9026855055946336,spatial
+183,75,black widow,animal,2.1973747735297926,spatial
+184,542,drumstick,instrument,0.30302177891618504,featural
+185,860,tobacco shop,other,6.186455362121896,spatial
+186,587,hammer,other,2.5100348624486655,spatial
+187,823,stethoscope,other,1.4061869565424463,spatial
+188,544,Dutch oven,other,1.2431943666871073,spatial
+189,594,harp,instrument,4.1182390304587875,spatial
+190,511,convertible,other,2.10973863168488,spatial
+191,527,desktop computer,furniture,0.23164831398575436,featural
+192,547,electric locomotive,vehicle,4.277937748397015,spatial
+193,524,cuirass,other,0.9909968146995388,spatial
+194,534,dishwasher,other,2.710837751579306,spatial
+195,790,shopping basket,other,1.3550026546884557,spatial
+196,552,feather boa,other,2.4671972025028026,spatial
+197,842,swimming trunks,other,2.7450722860886505,spatial
+198,505,coffeepot,other,0.6817233605278943,spatial
+199,505,coffeepot,other,0.7841845958489123,spatial
+200,521,Crock Pot,other,2.928006176777436,spatial
+201,521,Crock Pot,other,2.6512272695838037,spatial
+202,521,Crock Pot,other,1.9911159026885525,spatial
+203,520,crib,furniture,2.5294509628087023,spatial
+204,521,Crock Pot,other,3.7303729711428137,spatial
+205,520,crib,furniture,1.3159194887256538,spatial
+206,926,hot pot,other,2.85099247440048,spatial
+207,521,Crock Pot,other,1.691107275505727,spatial
+208,478,carton,vehicle,2.597280756642684,spatial
+209,520,crib,furniture,3.818484856904339,spatial
+210,521,Crock Pot,other,2.2752247747061687,spatial
+211,665,moped,other,1.1164406063058423,spatial
+212,520,crib,furniture,5.742229277864139,spatial
+213,521,Crock Pot,other,7.6801965114501805,spatial
+214,926,hot pot,other,3.254369538646647,spatial
+215,520,crib,furniture,1.2041252997596599,spatial
+216,519,crate,other,1.352365886142269,spatial
+217,519,crate,other,5.745327254685651,spatial
+218,926,hot pot,other,2.321433098232704,spatial
+219,520,crib,furniture,2.826922303860093,spatial
+220,519,crate,other,3.1014025848027753,spatial
+221,518,crash helmet,clothing,1.72704971707033,spatial
+222,520,crib,furniture,1.8129894557794803,spatial
+223,520,crib,furniture,5.747237449205609,spatial
+224,520,crib,furniture,1.158901974730361,spatial
+225,519,crate,other,3.377414672708211,spatial
+226,519,crate,other,8.029236441471966,spatial
+227,521,Crock Pot,other,2.9699272461796973,spatial
+228,521,Crock Pot,other,1.2767397488751229,spatial
+229,520,crib,furniture,2.7184736250524875,spatial
+230,520,crib,furniture,1.7935570093412694,spatial
+231,516,cradle,furniture,2.2781917154953937,spatial
+232,520,crib,furniture,2.2446300157858534,spatial
+233,449,boathouse,vehicle,7.240243848702769,spatial
+234,521,Crock Pot,other,2.930427892263015,spatial
+235,519,crate,other,1.874152836179802,spatial
+236,671,mountain bike,other,4.781977365708855,spatial
+237,520,crib,furniture,1.2123920453594907,spatial
+238,492,chest,other,3.202015837765675,spatial
+239,521,Crock Pot,other,5.366052608275671,spatial
+240,529,diaper,animal,3.0535523455261964,spatial
+241,521,Crock Pot,other,3.5038659421179172,spatial
+242,521,Crock Pot,other,4.189261361315455,spatial
+243,520,crib,furniture,1.4524219882701728,spatial
+244,520,crib,furniture,6.418966049941132,spatial
+245,519,crate,other,2.1978964819209255,spatial
+246,516,cradle,furniture,1.793427680993057,spatial
+247,516,cradle,furniture,3.8187502108937887,spatial
+248,516,cradle,furniture,1.8065426591134173,spatial
+249,553,file,other,1.0919229033685593,spatial
+250,516,cradle,furniture,2.698764915020446,spatial
+251,520,crib,furniture,2.542057246732876,spatial
+252,520,crib,furniture,0.953277390886743,spatial
+253,521,Crock Pot,other,3.896025715559023,spatial
+254,519,crate,other,4.6641746793292045,spatial
+255,520,crib,furniture,5.833775742807287,spatial
+256,520,crib,furniture,2.457793937286151,spatial
+257,518,crash helmet,clothing,1.4648900349940872,spatial
+258,520,crib,furniture,1.2601981632809423,spatial
+259,521,Crock Pot,other,1.290085544052261,spatial
+260,518,crash helmet,clothing,1.856505904755942,spatial
+261,518,crash helmet,clothing,3.773930223732953,spatial
+262,520,crib,furniture,3.1103123977058043,spatial
+263,520,crib,furniture,7.040845418437742,spatial
+264,521,Crock Pot,other,2.090482643904498,spatial
+265,926,hot pot,other,1.156375359590775,spatial
+266,518,crash helmet,clothing,3.832365094014183,spatial
+267,520,crib,furniture,0.7109812524623697,spatial
+268,670,motor scooter,vehicle,0.6077259662350613,featural
+269,521,Crock Pot,other,2.246324479636665,spatial
+270,831,studio couch,furniture,5.112283949050367,spatial
+271,544,Dutch oven,other,2.433141688926975,spatial
+272,520,crib,furniture,1.2155427683463564,spatial
+273,518,crash helmet,clothing,8.583245323238895,spatial
+274,521,Crock Pot,other,1.941113295911422,spatial
+275,520,crib,furniture,2.1284101409534646,spatial
+276,520,crib,furniture,2.9331892441277994,spatial
+277,926,hot pot,other,4.214012203582479,spatial
+278,955,jackfruit,other,2.416259514110627,spatial
+279,520,crib,furniture,2.5002789354478283,spatial
+280,520,crib,furniture,1.2690724975811403,spatial
+281,520,crib,furniture,1.6986379319883855,spatial
+282,520,crib,furniture,0.9743133147817645,spatial
+283,926,hot pot,other,3.167365580683568,spatial
+284,926,hot pot,other,2.2160944729649477,spatial
+285,519,crate,other,3.5686098368098453,spatial
+286,520,crib,furniture,1.5359945613293378,spatial
+287,926,hot pot,other,2.792762228817536,spatial
+288,520,crib,furniture,6.402814780484327,spatial
+289,516,cradle,furniture,4.768446759003045,spatial
+290,520,crib,furniture,1.2221437035597584,spatial
+291,521,Crock Pot,other,3.794948902639888,spatial
+292,962,meat loaf,other,1.8644057648992707,spatial
+293,520,crib,furniture,2.277302835231029,spatial
+294,729,plate rack,other,1.9445430973503848,spatial
+295,520,crib,furniture,3.498977490079547,spatial
+296,519,crate,other,2.2921001263911887,spatial
+297,520,crib,furniture,3.911450044116609,spatial
+298,520,crib,furniture,0.5317108476926057,featural
+299,520,crib,furniture,4.040821763692527,spatial
+300,520,crib,furniture,1.0486072946402323,spatial
+301,519,crate,other,4.010205041101638,spatial
+302,651,microwave,other,1.4723978778359248,spatial
+303,520,crib,furniture,1.5694935113571764,spatial
+304,520,crib,furniture,2.785292225609111,spatial
+305,520,crib,furniture,4.565323221579091,spatial
+306,521,Crock Pot,other,2.077820512336014,spatial
+307,520,crib,furniture,2.3328780685961132,spatial
+308,520,crib,furniture,2.125912064967071,spatial
+309,520,crib,furniture,4.434946066934603,spatial
+310,651,microwave,other,5.901709458543783,spatial
+311,691,oxygen mask,animal,3.3924734620246633,spatial
+312,926,hot pot,other,1.1137519579360278,spatial
+313,671,mountain bike,other,1.1870440053077265,spatial
+314,520,crib,furniture,4.495330496941572,spatial
+315,521,Crock Pot,other,2.51519657491889,spatial
+316,520,crib,furniture,0.38418359536263164,featural
+317,521,Crock Pot,other,2.5951526256496553,spatial
+318,431,bassinet,other,1.6067498388834074,spatial
+319,520,crib,furniture,0.974634772227286,spatial
+320,520,crib,furniture,2.1897195024681286,spatial
+321,521,Crock Pot,other,3.426732267197396,spatial
+322,520,crib,furniture,2.2368603470616195,spatial
+323,670,motor scooter,vehicle,2.6194104696836185,spatial
+324,789,shoji,other,2.2409003262917366,spatial
+325,520,crib,furniture,2.8060819703995263,spatial
+326,521,Crock Pot,other,2.4132720307540283,spatial
+327,827,stove,other,4.6844573276105415,spatial
+328,520,crib,furniture,1.3814254589137267,spatial
+329,518,crash helmet,clothing,0.8385585291528619,spatial
+330,926,hot pot,other,2.836025728379191,spatial
+331,870,tricycle,other,1.6741735641116242,spatial
+332,520,crib,furniture,9.93678513288193,spatial
+333,520,crib,furniture,7.283725849328784,spatial
+334,521,Crock Pot,other,4.672393213229874,spatial
+335,520,crib,furniture,3.893245595322017,spatial
+336,520,crib,furniture,3.857786397557069,spatial
+337,521,Crock Pot,other,2.4676162468862164,spatial
+338,671,mountain bike,other,3.0652802645531896,spatial
+339,520,crib,furniture,2.1234451563805536,spatial
+340,520,crib,furniture,0.18450540470396082,featural
+341,520,crib,furniture,0.5669262506365704,featural
+342,516,cradle,furniture,1.5358385034770743,spatial
+343,520,crib,furniture,4.171641703266299,spatial
+344,521,Crock Pot,other,1.307296445158523,spatial
+345,520,crib,furniture,2.014550034051672,spatial
+346,516,cradle,furniture,2.1663173488494354,spatial
+347,521,Crock Pot,other,2.074327621176972,spatial
+348,831,studio couch,furniture,1.565080859284822,spatial
+349,519,crate,other,2.155080034149474,spatial
+350,521,Crock Pot,other,5.564021990827252,spatial
+351,518,crash helmet,clothing,1.7549484483499453,spatial
+352,520,crib,furniture,0.8537213508643388,spatial
+353,520,crib,furniture,1.396122921782154,spatial
+354,520,crib,furniture,0.9003702466038105,spatial
+355,521,Crock Pot,other,1.4249485835317361,spatial
+356,520,crib,furniture,5.730734122074498,spatial
+357,802,snowmobile,other,3.0646810782279843,spatial
+358,912,worm fence,other,1.1331806607793564,spatial
+359,427,barrel,other,0.6849418205065401,spatial
+360,634,lumbermill,other,1.944479328181473,spatial
+361,665,moped,other,1.4191171187901441,spatial
+362,520,crib,furniture,1.8060693484908865,spatial
+363,519,crate,other,4.76424530490588,spatial
+364,516,cradle,furniture,2.196928385527775,spatial
+365,671,mountain bike,other,1.6003416335877476,spatial
+366,516,cradle,furniture,1.3019097729540767,spatial
+367,520,crib,furniture,0.6751154376050439,spatial
+368,469,caldron,other,1.5798055443558274,spatial
+369,521,Crock Pot,other,2.658010773955679,spatial
+370,521,Crock Pot,other,3.6729859733926435,spatial
+371,520,crib,furniture,1.1155591845868504,spatial
+372,519,crate,other,2.538342854035632,spatial
+373,518,crash helmet,clothing,2.5635881286347684,spatial
+374,634,lumbermill,other,11.705439777082855,spatial
+375,519,crate,other,2.109438413174256,spatial
+376,671,mountain bike,other,1.4223642083897017,spatial
+377,521,Crock Pot,other,2.0033588879536137,spatial
+378,520,crib,furniture,0.9631470706331617,spatial
+379,520,crib,furniture,0.9307349330584793,spatial
+380,518,crash helmet,clothing,0.9592868922511687,spatial
+381,444,bicycle-built-for-two,vehicle,1.8527991399354162,spatial
+382,521,Crock Pot,other,3.490963515863732,spatial
+383,520,crib,furniture,2.4889158289487217,spatial
+384,492,chest,other,4.12061539572912,spatial
+385,561,forklift,other,2.8695297357578577,spatial
+386,520,crib,furniture,2.2411917215913757,spatial
+387,431,bassinet,other,0.5118850547824105,featural
+388,526,desk,furniture,0.9103234855029146,spatial
+389,520,crib,furniture,2.2675561494450696,spatial
+390,926,hot pot,other,2.545432693944518,spatial
+391,926,hot pot,other,2.754523007044533,spatial
+392,831,studio couch,furniture,1.7857095125854205,spatial
+393,521,Crock Pot,other,7.022324998954367,spatial
+394,518,crash helmet,clothing,3.7108081979985594,spatial
+395,805,soccer ball,other,3.7814402546078627,spatial
+396,519,crate,other,5.370728517472035,spatial
+397,521,Crock Pot,other,2.676853672792615,spatial
+398,520,crib,furniture,1.0377153911003285,spatial
+399,671,mountain bike,other,4.310065389092967,spatial
+400,751,racer,other,3.0718215248895913,spatial
+401,516,cradle,furniture,4.871735973343565,spatial
+402,519,crate,other,1.4158536224909546,spatial
+403,669,mosquito net,other,1.933567917811969,spatial
+404,520,crib,furniture,2.9380337245517563,spatial
+405,521,Crock Pot,other,5.5259291205645935,spatial
+406,582,grocery store,other,2.548779528094995,spatial
+407,520,crib,furniture,4.396195428911981,spatial
+408,518,crash helmet,clothing,1.8905476837244288,spatial
+409,529,diaper,animal,1.9793698591439042,spatial
+410,708,pedestal,other,5.63959475664178,spatial
+411,519,crate,other,6.506358363694017,spatial
+412,765,rocking chair,furniture,0.5025389256831182,featural
+413,520,crib,furniture,2.0084646777221935,spatial
+414,519,crate,other,1.9037325786183599,spatial
+415,521,Crock Pot,other,1.5575307989881029,spatial
+416,518,crash helmet,clothing,6.301286644382834,spatial
+417,926,hot pot,other,1.5490299963893388,spatial
+418,926,hot pot,other,2.213840897288461,spatial
+419,516,cradle,furniture,1.5119546550951488,spatial
+420,521,Crock Pot,other,1.3071903958759097,spatial
+421,518,crash helmet,clothing,5.43948671726979,spatial
+422,492,chest,other,6.974043899123026,spatial
+423,522,croquet ball,other,4.014636826814654,spatial
+424,665,moped,other,0.8166477148245527,spatial
+425,518,crash helmet,clothing,4.7413654072008535,spatial
+426,520,crib,furniture,1.400437641182177,spatial
+427,518,crash helmet,clothing,2.1135996388959333,spatial
+428,669,mosquito net,other,0.9961791537849,spatial
+429,520,crib,furniture,1.0543385434761139,spatial
+430,518,crash helmet,clothing,6.711958856521758,spatial
+431,520,crib,furniture,1.5630015285290697,spatial
+432,520,crib,furniture,4.5934914887348945,spatial
+433,431,bassinet,other,1.2857058893178195,spatial
+434,602,horizontal bar,other,2.92500882823429,spatial
+435,585,hair spray,other,2.424011971702785,spatial
+436,969,eggnog,other,5.031084764041493,spatial
+437,617,lab coat,clothing,2.184991111311213,spatial
+438,577,gong,other,1.0254975826935018,spatial
+439,497,church,other,2.504521615050951,spatial
+440,521,Crock Pot,other,3.7303729711428137,spatial
+441,520,crib,furniture,1.2041252997596599,spatial
+442,520,crib,furniture,2.7184736250524875,spatial
+443,521,Crock Pot,other,1.941113295911422,spatial
+444,926,hot pot,other,4.214012203582479,spatial
+445,520,crib,furniture,0.9743133147817645,spatial
+446,520,crib,furniture,1.2221437035597584,spatial
+447,521,Crock Pot,other,2.074327621176972,spatial
+448,520,crib,furniture,2.2675561494450696,spatial
+449,926,hot pot,other,2.213840897288461,spatial
+450,511,convertible,other,5.977386575242558,spatial
+451,532,dining table,furniture,2.5886238135256625,spatial
+452,549,envelope,other,3.214871481079803,spatial
+453,605,iPod,other,1.9487731498957062,spatial
+454,441,beer glass,animal,1.9618072785865566,spatial
+455,536,dock,other,2.627799025881639,spatial
+456,607,jack-o'-lantern,animal,7.394677656024519,spatial
+457,587,hammer,other,2.5100348624486655,spatial
+458,547,electric locomotive,vehicle,4.277937748397015,spatial

@@ -1,0 +1,3 @@
+metric,cf_lift_mean,wilcoxon_p,n,pos_and_sig
+latent,-0.006131677329540253,0.6085058219759958,40,False
+overlap,-0.05356286231166485,0.009381349105751724,40,False

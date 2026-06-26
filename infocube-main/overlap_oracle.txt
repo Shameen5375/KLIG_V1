@@ -1,0 +1,6 @@
+overlap oracle
+perfect=0.7358
+shuffle=0.9478
+random=0.9474
+best_real_method=0.8617
+n=40

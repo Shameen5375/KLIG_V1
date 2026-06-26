@@ -49,7 +49,8 @@ from klig.image.stopping import find_sigma_stop
 # ── Hyperparams ───────────────────────────────────────────────────────────────
 KLIG_N_STEPS    = 30
 KLIG_N_MC       = 1365    # continuous_klig: 30×1365 ≈ 40k evals (reference)
-KLIG2_N_MC      = 64      # continuous_klig2: per-point, keep lower
+KLIG2_N_MC      = 512     # continuous_klig2: per-point LOCAL probe (256->512, less speckle)
+KLIG2_PROBE_FAC = 0.5     # local probe half-width = sigma * factor (tighter -> sharper)
 
 SIGMA_FIXED     = 0.05    # reference notebook SIGMA_F
 ADAPTIVE_TAU    = 0.95
@@ -283,11 +284,13 @@ def continuous_klig2(fn: nn.Module, points: np.ndarray,
     but centre follows the GradCF descent trajectory instead of 0→x_q.
 
     Phase 1: descend L(μ,lv)=E[||φ(x)−φ(x_cf)||²] from explicand → traj_mu.
-    Phase 2: integrate along traj_mu with uniform noise:
-        x_samp_k = traj_mu[k] + hw_k·(2u−1)
-        hw_k = extent·(1−k/K) + eps·(k/K)   (broad→tight, same schedule as KLIG)
+    Phase 2: integrate along traj_mu with a LOCAL uniform probe:
+        x_samp_k = traj_mu[k] + hw·(2u−1),   hw = sigma · KLIG2_PROBE_FAC
+    The probe is tied to the descent sigma and stays local around the current
+    trajectory position (NOT the global domain extent). Half-width is constant
+    along the path, so there is no dhw term — attribution is pure path integral:
 
-    attr_i = Σ_k  E[∂f/∂x_i]·dμ_k_i  +  E[(2u_i−1)·∂f/∂x_i]·dhw_k
+    attr_i = Σ_k  E[∂f/∂x_i]·dμ_k_i
     where  dμ_k = traj_mu[k] − traj_mu[k+1]  (backward displacement, same as IG²)
     """
     torch.manual_seed(seed)
@@ -305,28 +308,25 @@ def continuous_klig2(fn: nn.Module, points: np.ndarray,
         if K == 0:
             continue
 
-        # Phase 2: integrate with uniform noise along trajectory
+        # Phase 2: integrate with a LOCAL uniform probe along the trajectory.
+        # Half-width tied to the descent sigma (local), constant along the path
+        # -> no dhw term. Fixes the domain-spanning box artifact + speckle.
         attr_i = torch.zeros_like(x)
         D      = x.shape[0]
+        hw     = float(sigma) * KLIG2_PROBE_FAC      # local probe, NOT extent
 
         for k in range(K):
-            hw_k  = extent * (1.0 - k / K)       + eps * (k / K)
-            hw_k1 = extent * (1.0 - (k + 1) / K) + eps * ((k + 1) / K)
-            dhw_k = hw_k - hw_k1                  # positive (half-width shrinks)
-
             mu_k  = traj_mu[k]
             dmu_k = (traj_mu[k] - traj_mu[k + 1]).detach()
 
             u      = torch.rand(n_mc, D, device=DEVICE)
-            x_samp = mu_k.unsqueeze(0) + hw_k * (2.0 * u - 1.0)
+            x_samp = mu_k.unsqueeze(0) + hw * (2.0 * u - 1.0)
             x_flat = x_samp.requires_grad_(True)
 
             grads  = torch.autograd.grad(fn(x_flat).sum(), x_flat)[0].detach()
 
             dE_dmu = grads.mean(0)
-            dE_dhw = ((2.0 * u - 1.0) * grads).mean(0)
-
-            attr_i += dE_dmu * dmu_k + dE_dhw * dhw_k
+            attr_i += dE_dmu * dmu_k
 
         attr_[i] = attr_i.detach().cpu().numpy()
 

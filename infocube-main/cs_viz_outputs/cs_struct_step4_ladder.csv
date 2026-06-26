@@ -1,0 +1,7 @@
+rung,observed,expected
+class-blind oracle,0.0,≈ 0
+Random (noise),0.0052443419775459145,floor
+coherent-wrong,0.9599821318381581,low
+real methods (min),0.002840025179458309,mid
+real methods (max),0.11409810778902357,mid
+coherent-correct,0.946684195610596,high

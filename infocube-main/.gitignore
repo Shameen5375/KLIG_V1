@@ -1,0 +1,14 @@
+# Large, regenerable data caches — exceed GitHub's 100MB file limit (~14GB total)
+*.pkl
+cs_viz_cache/
+cs_gate_cache/
+klig2_dist_cache/
+klig2_val_cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Keep figures/tables (.png, .csv) but never the data stores (.pkl handled above)
