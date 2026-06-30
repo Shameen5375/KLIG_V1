@@ -1,0 +1,7 @@
+approach,metric,ResNet50_inR,ResNet50_outR,ResNet50_Rspecific,ViT_inR,ViT_outR,ViT_Rspecific
+A1_cue_ablation,Texture_margin_drop,0.0,0.0,0.0,0.08,0.0,0.08
+A1_cue_ablation,Edge_margin_drop,0.09,0.08,0.01,0.22,0.05,0.17
+A1_cue_ablation,Shape_margin_drop,0.08,-0.0,0.08,0.28,0.04,0.24
+A2_cue_conflict,shape_bias_sigma2,0.62,,,1.0,,
+A2_cue_conflict,shape_bias_sigma3,0.12,,,1.0,,
+A2_cue_conflict,shape_bias_sigma4,0.0,,,0.5,,
