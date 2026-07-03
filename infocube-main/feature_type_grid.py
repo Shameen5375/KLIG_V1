@@ -51,9 +51,10 @@ def denorm(a):
     m = np.array([0.485,0.456,0.406])[:,None,None]; sd = np.array([0.229,0.224,0.225])[:,None,None]
     return np.clip((a*sd+m).transpose(1,2,0), 0, 1)
 
-# pick K clear examples (good ViT margin + localized region)
+# pick K clear examples (good ViT margin + localized region), RANDOM order each run
 sel = []
-for R in store:
+for idx in np.random.default_rng().permutation(len(store)):     # unseeded -> different images each run
+    R = store[int(idx)]
     x = R['x'].squeeze(0).to(DEVICE); seg = R['seg']; labs = np.asarray(R['labels'])
     y1v, y2v = top2(vit, x); bv = margin(vit, x, y1v, y2v)
     if bv < 0.12: continue
@@ -87,7 +88,7 @@ for row, kind in enumerate(ROWS):
     ax[row, 0].text(-0.18, 0.5, kind.upper() + ('\nremoved in R' if kind != 'original' else ''),
                     transform=ax[row, 0].transAxes, rotation=90, va='center', ha='center',
                     fontsize=12, fontweight='bold')
-plt.suptitle('Texture vs Shape on images — cue removed inside ViT\'s discriminative region R (green)\n'
+plt.suptitle('Texture vs Shape on images — cue removed inside ViT\'s discriminative region R (blue outline)\n'
              'each panel: ViT Δ vs ResNet Δ margin drop  (green title = ViT loses more, blue = ResNet loses more)',
              fontsize=12, fontweight='bold')
 plt.tight_layout(rect=[0, 0, 1, 0.95]); plt.savefig('cs_viz_outputs/feature_type_grid.png', dpi=150, bbox_inches='tight'); plt.close()
