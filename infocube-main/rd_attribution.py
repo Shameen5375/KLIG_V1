@@ -15,7 +15,7 @@ Library only — visualization lives in the notebook. Demo: `python rd_attributi
 """
 from __future__ import annotations
 import sys, pickle, warnings
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 try: sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 except Exception: pass
@@ -32,7 +32,8 @@ class RDConfig:
     grid: int = 14                            # coarse disjoint grid (global R(D) curve + validation)
     window: int = 48                          # fine map: sliding-window size (receptive field, px)
     stride: int = 12                          # fine map: window stride (smaller = finer + more forwards)
-    smooth: float = 1.5                       # fine map: Gaussian smoothing σ (px) after upsample
+    smooth: float = 2.5                       # fine map: Gaussian smoothing σ (px) after upsample
+    soft_window: bool = True                   # Gaussian-soft windows (smooth, non-patchy) vs hard squares
     operator: str = 'noise'                   # 'noise' (amplitude) or 'blur' (spatial, §7)
     levels: tuple = ()                        # degradation grid; filled by default per operator
     n_mc: int = 4                             # Monte-Carlo draws per (region, level)
@@ -74,15 +75,24 @@ def _label_masks(lab, n_reg, device):
     H, W = lab.shape
     return [torch.from_numpy((lab == r).astype('float32')).to(device).view(1, 1, H, W) for r in range(n_reg)]
 
-def window_masks(H, W, window, stride, device):
-    """OVERLAPPING square windows on a regular center grid (fine map). Returns (masks, n_cy, n_cx)."""
-    cys = list(range(0, H, stride)); cxs = list(range(0, W, stride)); h = window // 2
+def window_masks(H, W, window, stride, device, soft=True):
+    """OVERLAPPING windows on a regular center grid (fine map). Returns (masks, n_cy, n_cx).
+    soft=True -> Gaussian bumps (contributions BLEND -> smooth, non-patchy map);
+    soft=False -> hard squares."""
+    cys = list(range(0, H, stride)); cxs = list(range(0, W, stride))
     masks = []
-    for cy in cys:
-        for cx in cxs:
-            m = np.zeros((H, W), 'float32')
-            m[max(0, cy - h):min(H, cy + h + 1), max(0, cx - h):min(W, cx + h + 1)] = 1.0
-            masks.append(torch.from_numpy(m).to(device).view(1, 1, H, W))
+    if soft:
+        yy, xx = np.mgrid[0:H, 0:W]; s2 = 2.0 * (window / 2.0) ** 2
+        for cy in cys:
+            for cx in cxs:
+                m = np.exp(-((yy - cy) ** 2 + (xx - cx) ** 2) / s2).astype('float32')
+                masks.append(torch.from_numpy(m).to(device).view(1, 1, H, W))
+    else:
+        h = window // 2
+        for cy in cys:
+            for cx in cxs:
+                m = np.zeros((H, W), 'float32'); m[max(0, cy-h):min(H, cy+h+1), max(0, cx-h):min(W, cx+h+1)] = 1.0
+                masks.append(torch.from_numpy(m).to(device).view(1, 1, H, W))
     return masks, len(cys), len(cxs)
 
 def field_to_map(scores, n_cy, n_cx, H, W, smooth):
@@ -231,12 +241,12 @@ def run_rd_attribution(model, img01, cfg: RDConfig, device, full=True):
     wrap = ModelWrapper(model, device)
     if img01.dim() == 3: img01 = img01.unsqueeze(0)
     img01 = img01.to(device)
-    if cfg.target_class is None:
-        cfg.target_class = int(wrap.logits(img01)[0].argmax())
+    if cfg.target_class is None:                               # don't mutate the caller's cfg (reuse-safe)
+        cfg = replace(cfg, target_class=int(wrap.logits(img01)[0].argmax()))
     H, W = img01.shape[-2:]
     op = get_operator(cfg.operator); levels = cfg.default_levels()
     # ── fine, smooth map from overlapping windows ──
-    wmasks, ncy, ncx = window_masks(H, W, cfg.window, cfg.stride, device)
+    wmasks, ncy, ncx = window_masks(H, W, cfg.window, cfg.stride, device, cfg.soft_window)
     dW, L0 = measure_rd_curves(wrap, img01, wmasks, op, levels, cfg.n_mc, cfg.target_class, cfg.batch, cfg.seed)
     suffW = sufficiency_score(dW, levels, cfg.tau, L0, cfg.rate_model, cfg.thr_mode); sensW = sensitivity_score(dW, levels)
     out = dict(cfg=cfg, target_class=cfg.target_class, L0=L0, levels=levels, n_windows=len(wmasks),

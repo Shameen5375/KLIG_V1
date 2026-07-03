@@ -65,7 +65,7 @@ for col, d in enumerate(tqdm(sel, desc='images')):
         ax[r, col].axis('off')
     # R-D map (fine overlapping-window map from the [0,1] image) — SAME post-processing as every other row
     res = RD.run_rd_attribution(model, (d['x']*_std+_mean).clamp(0,1),
-                                RD.RDConfig(window=48, stride=12, operator='noise', n_mc=3), DEVICE, full=False)
+                                RD.RDConfig(window=32, stride=8, smooth=1.5, operator='noise', n_mc=3), DEVICE, full=False)
     ax[len(ROWS)-1, col].imshow(norm_map(res['suff_map']), cmap='inferno'); ax[len(ROWS)-1, col].axis('off')
 
 for r, name in enumerate(ROWS):
