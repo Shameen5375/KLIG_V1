@@ -122,6 +122,26 @@ class BlurOperator:
 
 def get_operator(name): return NoiseOperator() if name == 'noise' else BlurOperator()
 
+def rise_smooth_map(wrap, img01, operator, level, cls, n_masks=3000, s=8, p=0.5, batch=64, seed=0):
+    """SMOOTH pixel-level importance via RISE-style random masks (no patch grid).
+    Thousands of random smooth masks; noise where mask=1; weight each mask by its logit drop.
+    importance[px] = mean logit-drop over masks that noised that pixel -> smooth heatmap."""
+    dev = img01.device; H, W = img01.shape[-2:]
+    L0 = float(wrap.target_logit(img01, cls).item()); rng = np.random.default_rng(seed)
+    ch, cw = int(np.ceil(H / s)), int(np.ceil(W / s)); uh, uw = (s + 1) * ch, (s + 1) * cw
+    acc = torch.zeros(1, H, W, device=dev); wsum = torch.zeros(1, H, W, device=dev); done = 0
+    while done < n_masks:
+        b = min(batch, n_masks - done)
+        grid = torch.from_numpy((rng.random((b, 1, s, s)) < p).astype('float32')).to(dev)
+        up = F.interpolate(grid, size=(uh, uw), mode='bilinear', align_corners=False)
+        M = torch.empty(b, 1, H, W, device=dev)
+        for i in range(b):
+            oy, ox = int(rng.integers(0, ch)), int(rng.integers(0, cw)); M[i] = up[i, :, oy:oy+H, ox:ox+W]
+        deg = operator.degrade(img01, level, rng)
+        L = wrap.target_logit(img01 * (1 - M) + deg * M, cls)          # (b,)
+        acc += ((L0 - L).view(b, 1, 1, 1) * M).sum(0); wsum += M.sum(0); done += b
+    return (acc / (wsum + EPS))[0].cpu().numpy()
+
 def rate_of(level, level_max, model='log'):      # bits/importance kept; monotone DECREASING in degradation. §3
     """'log': log(lmax/level) (unbounded, log-compressed, hard floor)  ·
     'linear': 1 - level/lmax (bounded [0,1], graded, gentler floor)."""

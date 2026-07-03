@@ -25,19 +25,22 @@ def overlay(img, amap, cmap='jet'):
     heat = cm.get_cmap(cmap)(a)[..., :3]; al = (0.25 + 0.55*a)[..., None]
     return np.clip(img*(1-al) + heat*al, 0, 1)
 
-# smoother config: soft Gaussian windows, dense stride, more smoothing
-cfg = RD.RDConfig(window=40, stride=8, smooth=3.0, soft_window=True, operator='noise', n_mc=3)
+# RISE-style random-mask smooth map (pixel-level, not patchy)
+wrap = RD.ModelWrapper(model, DEVICE); op = RD.NoiseOperator()
 fig, ax = plt.subplots(2, K, figsize=(3.0*K, 6.2), facecolor='white')
 if K == 1: ax = ax[:, None]
+from scipy.ndimage import gaussian_filter
 from tqdm import tqdm
 for c, img01 in enumerate(tqdm(imgs, desc='overlay')):
-    res = RD.run_rd_attribution(model, img01, cfg, DEVICE, full=False)
+    x = img01.unsqueeze(0).to(DEVICE); cls = int(wrap.logits(x)[0].argmax())
+    amap = RD.rise_smooth_map(wrap, x, op, 0.5, cls, n_masks=3000, s=8, p=0.5, batch=64, seed=0)
+    amap = gaussian_filter(np.clip(amap, 0, None), 4)
     im = img01.permute(1,2,0).cpu().numpy()
-    ax[0,c].imshow(im); ax[0,c].set_title(cats[res['target_class']].split(',')[0], fontsize=9); ax[0,c].axis('off')
-    ax[1,c].imshow(overlay(im, res['suff_map'])); ax[1,c].axis('off')
+    ax[0,c].imshow(im); ax[0,c].set_title(cats[cls].split(',')[0], fontsize=9); ax[0,c].axis('off')
+    ax[1,c].imshow(overlay(im, amap)); ax[1,c].axis('off')
 ax[0,0].text(-0.12,0.5,'image', transform=ax[0,0].transAxes, rotation=90, va='center', ha='center', fontsize=11, fontweight='bold')
 ax[1,0].text(-0.12,0.5,'R-D overlay', transform=ax[1,0].transAxes, rotation=90, va='center', ha='center', fontsize=11, fontweight='bold', color='#b00020')
-plt.suptitle('R-D Path Attribution — smooth heatmap overlaid on the image (soft windows, Grad-CAM style)',
+plt.suptitle('R-D Path Attribution — smooth pixel-level heatmap (RISE-style random-mask averaging, ~3000 masks)',
              fontsize=12, fontweight='bold')
 plt.tight_layout(rect=[0,0,1,0.96]); plt.savefig('cs_viz_outputs/rd_overlay.png', dpi=150, bbox_inches='tight'); plt.close()
 print('saved cs_viz_outputs/rd_overlay.png')
