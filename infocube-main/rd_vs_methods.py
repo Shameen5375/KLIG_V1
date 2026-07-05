@@ -15,9 +15,10 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 import klig_methods as KM
 from klig_methods import attr_map, METHODS as _ALL, make_phi
 import rd_attribution as RD
+from scipy.ndimage import gaussian_filter as _gf
 from torchvision.models import resnet50, ResNet50_Weights
 model = resnet50(weights=ResNet50_Weights.IMAGENET1K_V2).to(DEVICE).eval()
-cats = ResNet50_Weights.IMAGENET1K_V2.meta['categories']; phi = make_phi(model)
+cats = ResNet50_Weights.IMAGENET1K_V2.meta['categories']; phi = make_phi(model); _wrapRD = RD.ModelWrapper(model, DEVICE)
 KM.N_STEPS, KM.N_SAMPLES = 25, 3; KM.IG_STEPS = 25; KM.SG_SAMPLES = 25; KM.EG_SAMPLES = 25
 KM.T_DESC, KM.N_MC_DESC, KM.N_MC_GRAD = 25, 8, 3
 _mean = torch.tensor([0.485,0.456,0.406]).view(3,1,1); _std = torch.tensor([0.229,0.224,0.225]).view(3,1,1)
@@ -63,10 +64,11 @@ for col, d in enumerate(tqdm(sel, desc='images')):
         except Exception as e:
             ax[r, col].text(0.5, 0.5, 'err', ha='center');
         ax[r, col].axis('off')
-    # R-D map (fine overlapping-window map from the [0,1] image) — SAME post-processing as every other row
-    res = RD.run_rd_attribution(model, (d['x']*_std+_mean).clamp(0,1),
-                                RD.RDConfig(window=32, stride=8, smooth=1.5, operator='noise', n_mc=3), DEVICE, full=False)
-    ax[len(ROWS)-1, col].imshow(norm_map(res['suff_map']), cmap='inferno'); ax[len(ROWS)-1, col].axis('off')
+    # R-D map (RISE-style smooth pixel map) — SAME post-processing (norm_map + inferno) as every other row
+    x01 = (d['x']*_std+_mean).clamp(0,1).unsqueeze(0).to(DEVICE)
+    amap = RD.rise_smooth_map(_wrapRD, x01, RD.NoiseOperator(), 0.5, tgt, n_masks=3000, s=8, p=0.5, batch=64, seed=0)
+    amap = _gf(np.clip(amap, 0, None), 4)
+    ax[len(ROWS)-1, col].imshow(norm_map(amap), cmap='inferno'); ax[len(ROWS)-1, col].axis('off')
 
 for r, name in enumerate(ROWS):
     ax[r, 0].text(-0.15, 0.5, name, transform=ax[r, 0].transAxes, rotation=90, va='center', ha='center',
