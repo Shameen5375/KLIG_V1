@@ -172,13 +172,16 @@ def _with(cfg: RDConfig, **kw) -> RDConfig:
     return replace(cfg, **kw)
 
 
-# ── R(D) SWEEP — trace the rate-distortion curve by sweeping the rate weight lambda ──────
+# ── R(D) SWEEP — trace the rate-distortion curve by sweeping the DISTORTION BUDGET tau ───
 def rd_curve(model, image01_norm, target=None, cfg: RDConfig = RDConfig(),
-             lams=(0.02, 0.05, 0.1, 0.3, 1.0, 3.0), x_cf=None):
-    """Sweep lam (budget knob, KL-IG's t played as a BUDGET not a path param).
-    Returns list of (lam, total_rate, distortion) — the R(D) trace."""
+             taus=(0.02, 0.05, 0.10, 0.20, 0.35, 0.50, 0.70), x_cf=None):
+    """Trace R(D): for each distortion budget tau, the MIN rate the allocation must spend.
+    tau is the KL-IG path parameter t played as a BUDGET (how much prediction you allow to
+    lose) rather than a position along a path.  As tau grows you may throw away more, so the
+    required rate falls — the signature rate-distortion tradeoff.
+    Returns list of (tau, total_rate, D_final)."""
     out = []
-    for lam in lams:
-        r = rd_attribution(model, image01_norm, target, _with(cfg, lam=lam), x_cf)
-        out.append((lam, r["info"]["total_rate"], r["info"]["D_final"]))
+    for t in taus:
+        r = rd_attribution(model, image01_norm, target, _with(cfg, tau=t), x_cf)
+        out.append((t, r["info"]["total_rate"], r["info"]["D_final"]))
     return out
