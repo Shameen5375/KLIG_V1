@@ -67,21 +67,18 @@ for d in tqdm(sel, desc='maps'):
             try: maps[m].append(attr_map(m, model, xn, tgt, x_cf=xcf, phi=phi).detach().cpu().numpy())
             except Exception: maps[m].append(np.zeros((224,224)))
 
-# rows = images, columns = [input image] + methods  (actual image in the leftmost panel)
-ncol = 1 + len(METHODS)
-fig, ax = plt.subplots(len(sel), ncol, figsize=(2.3*ncol, 2.5*len(sel)), facecolor='white')
-if len(sel)==1: ax = ax[None, :]
-for r, d in enumerate(sel):
+# rows = [input] + methods, columns = images  (methods down a column, images across a row)
+ROWS = ['input'] + METHODS
+fig, ax = plt.subplots(len(ROWS), len(sel), figsize=(2.6*len(sel), 2.4*len(ROWS)), facecolor='white')
+if len(sel)==1: ax = ax[:, None]
+for c, d in enumerate(sel):
     img = denorm(d['x']); tgt = int(model(d['x'].to(DEVICE).unsqueeze(0))[0].argmax())
-    ax[r,0].imshow(img); ax[r,0].axis('off')
-    ax[r,0].text(-0.10,0.5,cats[tgt].split(',')[0], transform=ax[r,0].transAxes, rotation=90,
-                 va='center', ha='center', fontsize=9, fontweight='bold')
-    for c, m in enumerate(METHODS, start=1):
-        ax[r,c].imshow(reveal(img, maps[m][r], FRAC)); ax[r,c].axis('off')
-ax[0,0].set_title('input', fontsize=9, fontweight='bold')
-for c, m in enumerate(METHODS, start=1):
-    ax[0,c].set_title(m, fontsize=7.5, fontweight='bold', rotation=35, ha='left',
-                      color=('#b00020' if m.startswith('R-D') else 'black'))
+    ax[0,c].imshow(img); ax[0,c].axis('off'); ax[0,c].set_title(cats[tgt].split(',')[0], fontsize=9)
+    for r, m in enumerate(METHODS, start=1):
+        ax[r,c].imshow(reveal(img, maps[m][c], FRAC)); ax[r,c].axis('off')
+for r, name in enumerate(ROWS):
+    ax[r,0].text(-0.14,0.5,name, transform=ax[r,0].transAxes, rotation=90, va='center', ha='center',
+                 fontsize=9, fontweight='bold', color=('#b00020' if name.startswith('R-D') else 'black'))
 plt.suptitle(f'Top-{int(FRAC*100)}% salient region reveal ({ARCH.upper()}) — XRAI format (arXiv:1906.02825), all methods',
              fontsize=13, fontweight='bold')
 plt.tight_layout(rect=[0,0,1,0.98]); out=f'cs_viz_outputs/rd_xrai_all_methods_{ARCH}.png'
