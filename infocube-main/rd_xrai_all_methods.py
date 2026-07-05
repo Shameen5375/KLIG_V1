@@ -17,6 +17,7 @@ DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 import klig_methods as KM
 from klig_methods import attr_map, METHODS as _ALL, make_phi
 import rd_attribution as RD
+import rd_distspace as RDS
 if ARCH == 'vit':
     from torchvision.models import vit_b_16, ViT_B_16_Weights
     _w = ViT_B_16_Weights.IMAGENET1K_V1; model = vit_b_16(weights=_w).to(DEVICE).eval()
@@ -42,7 +43,8 @@ for d in pool: cf_by.setdefault(d['y1'], d['x'])
 sel = pool[:K]
 PO = ['Vanilla Grad','SmoothGrad','IG-zero','Blur-IG','IDG','Guided IG','ExpGrad',
       'KLIG-Adaptive','KL-IG (linear)','KL-IG²','KL-IG² (adaptive)']
-METHODS = [m for m in PO if m in _ALL] + [m for m in _ALL if m not in PO] + ['R-D (noise)']
+METHODS = [m for m in PO if m in _ALL] + [m for m in _ALL if m not in PO] + ['R-D (noise)', 'R-D (dist-space)']
+_rds_cfg = RDS.RDConfig(n_mc=8, n_iter=150)
 print(f'[setup] arch={ARCH} {len(sel)} imgs × {len(METHODS)} methods, top-{int(FRAC*100)}% reveal')
 
 def denorm(x): return (x*_std+_mean).clamp(0,1).permute(1,2,0).cpu().numpy()
@@ -57,7 +59,9 @@ for d in tqdm(sel, desc='maps'):
     xn = d['x'].to(DEVICE); tgt = int(model(xn.unsqueeze(0))[0].argmax()); xcf = (cf_by.get(d['y2'], pool[0]['x'])).to(DEVICE)
     x01 = (d['x']*_std+_mean).clamp(0,1).unsqueeze(0).to(DEVICE)
     for m in METHODS:
-        if m.startswith('R-D'):
+        if m == 'R-D (dist-space)':
+            maps[m].append(RDS.rd_attribution(model, xn.unsqueeze(0), tgt, _rds_cfg)['attribution'].cpu().numpy())
+        elif m.startswith('R-D'):
             maps[m].append(RD.rise_smooth_map(wrap, x01, RD.NoiseOperator(), 0.5, tgt, n_masks=3000, s=8, seed=0))
         else:
             try: maps[m].append(attr_map(m, model, xn, tgt, x_cf=xcf, phi=phi).detach().cpu().numpy())
