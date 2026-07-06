@@ -197,39 +197,30 @@ print(f'\nmethod-ordering under hflip: Spearman(base, flip) = {rho:+.3f}  | top 
 
 pickle.dump(dict(rows=rows, mb=mb, mf=mf, methods=list(_ALL)), open(OUT/'augment_consistency_summary.pkl','wb'))
 
-# ── figure ──────────────────────────────────────────────────────────────────────────────
+# ── figure (2 panels) ───────────────────────────────────────────────────────────────────
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
-fig, ax = plt.subplots(1, 3, figsize=(16, 5), facecolor='white')
+fig, ax = plt.subplots(1, 2, figsize=(12, 5.2), facecolor='white')
 # A: before vs after scatter (pooled preserving transforms) — tight to y=x = stable
 cmap = plt.get_cmap('tab10')
 for j, name in enumerate(TRANSFORMS):
     b = cs0; a = np.array([r['transforms'][name]['cs'] for r in rows])
-    ax[0].scatter(b, a, s=16, alpha=0.6, color=cmap(j), label=name)
+    ax[0].scatter(b, a, s=18, alpha=0.6, color=cmap(j), label=name)
 lim = [0, max(cs0.max(), 1.0)*1.05]
 ax[0].plot(lim, lim, 'k--', lw=1, alpha=0.6); ax[0].set_xlim(lim); ax[0].set_ylim(lim)
 ax[0].set_xlabel('CS_struct — original', fontsize=11); ax[0].set_ylabel('CS_struct — transformed', fontsize=11)
 ax[0].set_title('Stability: transformed ≈ original (on y=x)', fontsize=12, fontweight='bold')
-ax[0].legend(fontsize=8, loc='upper left'); ax[0].grid(alpha=0.3)
-# B: relative drift box — preserving (small) vs class-swap control (large)
+ax[0].legend(fontsize=9, loc='upper left'); ax[0].grid(alpha=0.3)
+# B: absolute drift box — preserving (small) vs class-swap control (large)
 keys = list(TRANSFORMS) + ['CTRL: class-swap']
 data = [drift_by[k] for k in keys]
 bp = ax[1].boxplot(data, vert=True, patch_artist=True, showfliers=False, widths=0.6)
 for k, patch in enumerate(bp['boxes']): patch.set_facecolor('#b00020' if keys[k].startswith('CTRL') else '#4c72b0'); patch.set_alpha(0.7)
 ax[1].set_xticklabels(keys, rotation=30, ha='right', fontsize=9)
 ax[1].set_ylabel('absolute drift  |ΔCS|', fontsize=11)
-ax[1].set_title(f'Label-preserving drift ≪ class-swap drift ({ctrl.mean()/(pooled_pres.mean()+EPS):.1f}×)',
-                fontsize=12, fontweight='bold'); ax[1].grid(alpha=0.3, axis='y')
-# C: method ordering under flip — per-method mean base vs flip
-ax[2].scatter(mb, mf, s=40, color='#4c72b0')
-hi = _ALL.index(HEAD) if HEAD in _ALL else int(np.argmax(mb))
-ax[2].scatter(mb[hi], mf[hi], s=120, color='#b00020', zorder=5, label=HEAD)
-lim2 = [0, max(mb.max(), mf.max())*1.1]
-ax[2].plot(lim2, lim2, 'k--', lw=1, alpha=0.6); ax[2].set_xlim(lim2); ax[2].set_ylim(lim2)
-ax[2].set_xlabel('mean CS_struct — original', fontsize=11); ax[2].set_ylabel('mean CS_struct — flipped', fontsize=11)
-ax[2].set_title(f'Method ranking preserved under flip (ρ={rho:+.2f})', fontsize=12, fontweight='bold')
-ax[2].legend(fontsize=9); ax[2].grid(alpha=0.3)
+ax[1].set_title(f'Label-preserving drift ≪ class-swap drift ({ctrl.mean()/(pooled_pres.mean()+EPS):.1f}×, '
+                f'p={pv:.1e})', fontsize=12, fontweight='bold'); ax[1].grid(alpha=0.3, axis='y')
 plt.suptitle(f'Gated CS_struct — augmentation-consistency check (n={n}, headline={HEAD}): '
              'stable under label-preserving transforms, sensitive to class change',
              fontsize=12, fontweight='bold')
-plt.tight_layout(rect=[0,0,1,0.96]); out=OUT/'augment_consistency.png'
+plt.tight_layout(rect=[0,0,1,0.95]); out=OUT/'augment_consistency.png'
 plt.savefig(out, dpi=150, bbox_inches='tight'); plt.close(); print('saved', out)
