@@ -87,13 +87,16 @@ def cs_struct_gated(A1, A2, mask, sigma=4):
 def attr_for(m, x1, cls, x_cf):
     return attr_map(m, model, x1, int(cls), x_cf=x_cf, phi=phi)
 
-def gated_cs(x, y1, y2, x_cf, m=HEAD):
-    """Full pipeline: segments -> discriminative region -> gated CS_struct for method m."""
+def region_for(x, y1, y2):
+    """Segments + occlusion + top-25% discriminative region — computed ONCE, reused across methods."""
     seg = get_segments(x); labs, d1, d2 = segment_model_delta(x, y1, y2, seg)
-    region = np.isin(seg, labs[_topseg(np.abs(d1 - d2))]).astype(float)
+    return np.isin(seg, labs[_topseg(np.abs(d1 - d2))]).astype(float)
+
+def cs_method(x, y1, y2, x_cf, region, m=HEAD):
+    """gated CS_struct for method m, reusing a precomputed region."""
     A1 = attr_for(m, x, y1, x_cf).detach().cpu().numpy()
     A2 = attr_for(m, x, y2, x_cf).detach().cpu().numpy()
-    return cs_struct_gated(A1, A2, region), (seg, labs, d1, d2, region)
+    return cs_struct_gated(A1, A2, region)
 
 # ── label-preserving transforms (image-space; renormalize for photometric) ──────────────
 def denorm(x): return (x*_std.to(x.device)+_mean.to(x.device)).clamp(0,1)
@@ -137,20 +140,23 @@ for i in tqdm(range(len(rows), len(sel)), desc='aug-consistency'):
     d = sel[i]; x0 = d['x'].to(DEVICE); y1, y2 = int(d['high_cls'][0]), int(d['high_cls'][1])
     xcf = cf_for(y2)
     top0 = int(model(x0.unsqueeze(0))[0].argmax())
-    cs0, _ = gated_cs(x0, y1, y2, xcf)                        # baseline
-    # all-method baseline (for ordering-under-flip check)
-    base_all = {m: gated_cs(x0, y1, y2, xcf, m)[0] for m in _ALL}
+    reg0 = region_for(x0, y1, y2)                             # region computed ONCE, reused by all methods
+    base_all = {m: cs_method(x0, y1, y2, xcf, reg0, m) for m in _ALL}
+    cs0 = base_all[HEAD]                                      # headline = its entry (no recompute)
     rec = dict(y1=y1, y2=y2, cs0=cs0, base_all=base_all, transforms={}, flip_all={})
     for name, t in TRANSFORMS.items():
         xt = t(x0)
         topt = int(model(xt.unsqueeze(0))[0].argmax())
-        cst, _ = gated_cs(xt, y1, y2, xcf, HEAD)
-        rec['transforms'][name] = dict(cs=cst, pred_preserved=(topt == top0))
+        regt = region_for(xt, y1, y2)                         # one region per transformed image
         if name == 'hflip':
-            rec['flip_all'] = {m: gated_cs(xt, y1, y2, xcf, m)[0] for m in _ALL}
+            rec['flip_all'] = {m: cs_method(xt, y1, y2, xcf, regt, m) for m in _ALL}
+            cst = rec['flip_all'][HEAD]
+        else:
+            cst = cs_method(xt, y1, y2, xcf, regt, HEAD)
+        rec['transforms'][name] = dict(cs=cst, pred_preserved=(topt == top0))
     # label-CHANGING control: swap y2 -> random class (sensitivity)
     yr = int(_rng.choice([c for c in range(1000) if c not in (y1, y2)]))
-    csc, _ = gated_cs(x0, y1, yr, cf_for(yr), HEAD)
+    csc = cs_method(x0, y1, yr, cf_for(yr), region_for(x0, y1, yr), HEAD)
     rec['control_swap'] = csc
     rows.append(rec)
     if (i+1) % 10 == 0: pickle.dump(rows, open(CKPT,'wb'))
