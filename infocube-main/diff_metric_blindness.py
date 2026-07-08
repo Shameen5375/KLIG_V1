@@ -94,7 +94,15 @@ axs.text(0.03, 0.06,
          transform=axs.transAxes, va='bottom', ha='left', fontsize=9,
          bbox=dict(boxstyle='round', fc='#fff6e0', ec='#d9a441'))
 plt.suptitle('Difference-based class sensitivity is gameable by noise.', fontsize=13.5, fontweight='bold')
-plt.tight_layout(rect=[0,0,1,0.95]); out='cs_viz_outputs/diff_metric_blindness.png'
+fig.text(0.5, 0.01,
+         r"Construction:  $A_1=B+\Delta/2,\ \ A_2=B-\Delta/2,\ \ "
+         r"\Delta(\alpha)=E\cdot\frac{\sqrt{1-\alpha}\,S+\sqrt{\alpha}\,N}{\|\sqrt{1-\alpha}\,S+\sqrt{\alpha}\,N\|}$"
+         r"   (energy $\|\Delta\|=E$ held fixed)"
+         r"          Difference metric (e.g. cosine):  $D=1-\frac{\langle A_1,A_2\rangle}{\|A_1\|\,\|A_2\|}$"
+         r"   —  larger $D\equiv$ 'more class-sensitive'",
+         ha='center', va='bottom', fontsize=10.5,
+         bbox=dict(boxstyle='round', fc='#eef4ff', ec='#7a9bd6'))
+plt.tight_layout(rect=[0,0.075,1,0.94]); out='cs_viz_outputs/diff_metric_blindness.png'
 plt.savefig(out, dpi=150, bbox_inches='tight'); plt.close()
 flat = max(abs(np.array(v)[-1]-np.array(v)[0])/(rp[k]+EPS) for k,v in curves.items())
 print(f'sweep: difference metrics drift <= {100*flat:.1f}% of the random-pair scale, structure->noise')
