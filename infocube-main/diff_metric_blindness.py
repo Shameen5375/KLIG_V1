@@ -94,17 +94,52 @@ axs.text(0.03, 0.06,
          transform=axs.transAxes, va='bottom', ha='left', fontsize=9,
          bbox=dict(boxstyle='round', fc='#fff6e0', ec='#d9a441'))
 plt.suptitle('Difference-based class sensitivity is gameable by noise.', fontsize=13.5, fontweight='bold')
-fig.text(0.5, 0.01,
-         r"Construction:  $A_1=B+\Delta/2,\ \ A_2=B-\Delta/2,\ \ "
-         r"\Delta(\alpha)=E\cdot\frac{\sqrt{1-\alpha}\,S+\sqrt{\alpha}\,N}{\|\sqrt{1-\alpha}\,S+\sqrt{\alpha}\,N\|}$"
-         r"   (energy $\|\Delta\|=E$ held fixed)"
-         r"          Difference metric (e.g. cosine):  $D=1-\frac{\langle A_1,A_2\rangle}{\|A_1\|\,\|A_2\|}$"
-         r"   —  larger $D\equiv$ 'more class-sensitive'",
+fig.text(0.5, 0.015,
+         "What we're plotting:  the class-difference map is morphed from a clean STRUCTURED pattern (α=0) to pure NOISE (α=1), "
+         "with its total magnitude (energy) held CONSTANT.\n"
+         "Each line = one difference metric's score along that morph (÷ its two-unrelated-maps value). "
+         "The lines stay flat → the metric scores noise exactly like structure.",
          ha='center', va='bottom', fontsize=10.5,
          bbox=dict(boxstyle='round', fc='#eef4ff', ec='#7a9bd6'))
-plt.tight_layout(rect=[0,0.075,1,0.94]); out='cs_viz_outputs/diff_metric_blindness.png'
+plt.tight_layout(rect=[0,0.085,1,0.94]); out='cs_viz_outputs/diff_metric_blindness.png'
 plt.savefig(out, dpi=150, bbox_inches='tight'); plt.close()
 flat = max(abs(np.array(v)[-1]-np.array(v)[0])/(rp[k]+EPS) for k,v in curves.items())
 print(f'sweep: difference metrics drift <= {100*flat:.1f}% of the random-pair scale, structure->noise')
 print(f'(console-only: coherence falls {100*(1-coh_curve[-1]/coh_curve[0]):.0f}% over the same sweep)')
 print('saved', out)
+
+# ══════════════════════════════════════════════════════════════════════════════════════════
+#  PAYOFF FIGURE (belongs in the CS_struct section): add the COHERENCE-DIFFERENCE metric,
+#  which measures the spatial coherence of the class-difference map and so is NOT gamed by noise.
+#  coherence-difference:  CD(A1,A2) = ||G_σ * (A1-A2)||² / ||A1-A2||²    (σ=4 Gaussian blur)
+# ══════════════════════════════════════════════════════════════════════════════════════════
+cd_coh, cd_noise = coherence(d_coh), coherence(d_noise)
+fig2 = plt.figure(figsize=(15, 5.4), facecolor='white')
+gs2 = fig2.add_gridspec(1, 3, width_ratios=[1, 1, 2.1], wspace=0.28)
+axc2 = fig2.add_subplot(gs2[0]); axc2.imshow(d_coh, cmap='RdBu_r', vmin=-vmax, vmax=vmax); axc2.axis('off')
+axc2.set_title(f'structured class-difference\ncoherence difference = {cd_coh:.2f}', fontsize=11, fontweight='bold', color='#b00020')
+axn2 = fig2.add_subplot(gs2[1]); axn2.imshow(d_noise, cmap='RdBu_r', vmin=-vmax, vmax=vmax); axn2.axis('off')
+axn2.set_title(f'noise class-difference\ncoherence difference = {cd_noise:.3f}', fontsize=11, fontweight='bold', color='#1f6fd6')
+txt2 = ('difference metrics:\n  SAME score  (fooled)\n\ncoherence difference:\n'
+        f'  {cd_coh:.2f}  vs  {cd_noise:.3f}\n  → separates them')
+axn2.text(1.05, 0.5, txt2, transform=axn2.transAxes, va='center', ha='left', fontsize=9, family='monospace',
+          bbox=dict(boxstyle='round', fc='#eafaea', ec='#4c9a4c'))
+axs2 = fig2.add_subplot(gs2[2])
+for j, (k, v) in enumerate(curves.items()):                                    # difference metrics, relative to a=0
+    axs2.plot(alphas, np.array(v)/(np.array(v)[0]+EPS), '-o', ms=3, color=cmap(j), alpha=0.55, label=f'{k} (difference)')
+axs2.plot(alphas, coh_curve/(coh_curve[0]+EPS), '-s', color='#127a12', lw=3, ms=5, label='coherence difference (proposed)')
+axs2.set_xlabel('α   (0 = pure structure  →  1 = pure noise),  energy held CONSTANT', fontsize=11)
+axs2.set_ylabel('score  (relative to α=0)', fontsize=11); axs2.set_ylim(-0.05, 1.15)
+axs2.set_title('Coherence difference collapses on noise; difference metrics stay flat', fontsize=12, fontweight='bold')
+axs2.grid(alpha=0.3); axs2.legend(fontsize=9, loc='center left')
+fig2.suptitle('A coherence-difference metric is not gameable by noise.', fontsize=13.5, fontweight='bold')
+fig2.text(0.5, 0.015,
+          "What we're plotting:  the SAME morph (structure → noise, constant energy).  "
+          "Green line = coherence difference — it measures how spatially coherent the class-difference is, so it "
+          "falls from high (structure) to ~0 (noise).\nThe faint difference-metric lines stay flat. "
+          "Only the coherence-difference metric tells structure and noise apart.",
+          ha='center', va='bottom', fontsize=10.5, bbox=dict(boxstyle='round', fc='#eafaea', ec='#4c9a4c'))
+plt.tight_layout(rect=[0,0.085,1,0.94]); out2='cs_viz_outputs/coherence_difference_payoff.png'
+plt.savefig(out2, dpi=150, bbox_inches='tight'); plt.close()
+print(f'coherence difference: structured={cd_coh:.3f}  noise={cd_noise:.3f}  (difference metrics saw them as identical)')
+print('saved', out2)
