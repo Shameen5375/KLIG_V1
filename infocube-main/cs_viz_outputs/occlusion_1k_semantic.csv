@@ -1,0 +1,18 @@
+category,n,spatial,featural,pct_spatial
+bird,298,291,7,98
+reptile,174,152,22,87
+snake,126,109,17,87
+insect/arthropod,88,81,7,92
+amphibian,74,71,3,96
+other animal,60,59,1,98
+fish,58,53,5,91
+other mammal,41,39,2,95
+invertebrate,37,37,0,100
+other,28,28,0,100
+structure/building,4,3,1,75
+device/appliance,4,4,0,100
+other object,3,3,0,100
+clothing,2,2,0,100
+container,1,1,0,100
+food/produce,1,1,0,100
+vehicle,1,1,0,100
