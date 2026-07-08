@@ -177,7 +177,19 @@ def overlay(i, y1, y2):
     al=(0.55*mag)[...,None]; col=np.where((sgn>0)[...,None], np.array([0.85,0.1,0.1]), np.array([0.1,0.3,0.9]))
     o = np.clip(im*(1-al)+col*al,0,1); o[boundaries(seg)] = [0.82,0.82,0.82]      # yellow superpixel edges
     return o
-order = np.argsort(conf); featural_i = order[:3]; spatial_i = order[::-1][:3]
+order = np.argsort(conf)                                                  # ascending: featural..spatial
+def _diverse(pool, k=3, skip=0):                                         # distinct top-1 class, varied
+    out, seen = [], set()
+    for i in pool[skip:]:
+        c = rows[i]['y1']
+        if c in seen: continue
+        seen.add(c); out.append(i)
+        if len(out) >= k: break
+    return out
+spatial_pool  = [i for i in order[::-1] if conf[i] > thr]                 # most-spatial first
+featural_pool = [i for i in order if conf[i] <= thr]                      # most-featural first
+spatial_i  = _diverse(spatial_pool, 3, skip=4)                           # skip extremes -> fresh variants
+featural_i = _diverse(featural_pool, 3, skip=1)
 fig, ax = plt.subplots(2, 3, figsize=(11, 7.6), facecolor='white')
 for c, k in enumerate(spatial_i):
     r = rows[k]; ax[0,c].imshow(overlay(r['idx'], r['y1'], r['y2'])); ax[0,c].axis('off')
