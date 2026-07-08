@@ -93,8 +93,7 @@ axs.text(0.03, 0.06,
          '→ magnitude cannot explain the flat line;\n   the metric is blind to coherence itself.',
          transform=axs.transAxes, va='bottom', ha='left', fontsize=9,
          bbox=dict(boxstyle='round', fc='#fff6e0', ec='#d9a441'))
-plt.suptitle('Difference-family class-sensitivity metrics are blind to coherence '
-             '(controlled, constant-energy — no method, no proposed metric)', fontsize=12.5, fontweight='bold')
+plt.suptitle('Difference-based class sensitivity is gameable by noise.', fontsize=13.5, fontweight='bold')
 plt.tight_layout(rect=[0,0,1,0.95]); out='cs_viz_outputs/diff_metric_blindness.png'
 plt.savefig(out, dpi=150, bbox_inches='tight'); plt.close()
 flat = max(abs(np.array(v)[-1]-np.array(v)[0])/(rp[k]+EPS) for k,v in curves.items())
