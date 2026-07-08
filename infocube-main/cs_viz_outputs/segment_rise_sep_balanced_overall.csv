@@ -1,0 +1,9 @@
+metric,value
+images (n),1000
+method,segment-RISE (interactions)
+SPATIAL — different regions,393  (39.3%)
+FEATURAL — same region,607  (60.7%)
+confusable ratio (mean/median),1.207 / 1.006
+random ratio (mean/median),0.605 / 0.540
+threshold (rand mean+std),1.046
+confusable > random (Wilcoxon),p = 1.1e-71
