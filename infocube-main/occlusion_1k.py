@@ -162,13 +162,19 @@ plt.tight_layout(rect=[0,0,1,0.95]); plt.savefig('cs_viz_outputs/occlusion_1k_st
 print('saved cs_viz_outputs/occlusion_1k_stats.png')
 
 # ── examples (3 most-spatial + 3 most-featural), recomputed on demand ────────────────────
+def boundaries(seg):
+    b = np.zeros(seg.shape, bool)
+    b[:-1,:] |= seg[:-1,:]!=seg[1:,:]; b[1:,:] |= seg[:-1,:]!=seg[1:,:]
+    b[:,:-1] |= seg[:,:-1]!=seg[:,1:]; b[:,1:] |= seg[:,:-1]!=seg[:,1:]
+    return b
 def overlay(i, y1, y2):
     x = img_of(pool[i]).to(DEVICE); seg = get_segments(x); d1,d2,_ = seg_delta(x, y1, y2, seg)
     diff = d1 - d2; disc = np.abs(diff) >= np.quantile(np.abs(diff), 1-DR_FRAC)
     im = (x.cpu()*_std+_mean).clamp(0,1).permute(1,2,0).numpy()
     sgn = (np.where(disc, np.sign(diff), 0)*np.abs(diff))[seg]; mag = np.abs(sgn)/(np.abs(sgn).max()+EPS)
     al=(0.55*mag)[...,None]; col=np.where((sgn>0)[...,None], np.array([0.85,0.1,0.1]), np.array([0.1,0.3,0.9]))
-    return np.clip(im*(1-al)+col*al,0,1)
+    o = np.clip(im*(1-al)+col*al,0,1); o[boundaries(seg)] = [1.0,1.0,0.0]      # yellow superpixel edges
+    return o
 order = np.argsort(conf); featural_i = order[:3]; spatial_i = order[::-1][:3]
 fig, ax = plt.subplots(2, 3, figsize=(11, 7.6), facecolor='white')
 for c, k in enumerate(spatial_i):

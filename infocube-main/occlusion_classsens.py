@@ -98,14 +98,21 @@ recs = recs[:len(sel)]; n = len(recs)
 def denorm_np(xh):
     x = torch.from_numpy(xh.astype(np.float32))
     return (x*_std+_mean).clamp(0,1).permute(1,2,0).numpy()
-def disc_overlay(rec):
+def boundaries(seg):
+    b = np.zeros(seg.shape, bool)
+    b[:-1,:] |= seg[:-1,:]!=seg[1:,:]; b[1:,:] |= seg[:-1,:]!=seg[1:,:]
+    b[:,:-1] |= seg[:,:-1]!=seg[:,1:]; b[:,1:] |= seg[:,:-1]!=seg[:,1:]
+    return b
+def disc_overlay(rec, bd=True):
     seg, d1, d2 = rec['seg'].astype(int), rec['d1'], rec['d2']; diff = d1 - d2
     disc = np.abs(diff) >= np.quantile(np.abs(diff), 1-DR_FRAC)
     im = denorm_np(rec['x'])
     sgn = (np.where(disc, np.sign(diff), 0)*np.abs(diff))[seg]
     mag = np.abs(sgn)/(np.abs(sgn).max()+EPS); al = (0.55*mag)[...,None]
     col = np.where((sgn>0)[...,None], np.array([0.85,0.1,0.1]), np.array([0.1,0.3,0.9]))
-    return np.clip(im*(1-al)+col*al, 0, 1)
+    o = np.clip(im*(1-al)+col*al, 0, 1)
+    if bd: o[boundaries(seg)] = [1.0,1.0,0.0]                                    # yellow superpixel edges
+    return o
 def heat(im, m, cmap):
     mn = np.clip(m/(m.max()+EPS),0,1); h = cm.get_cmap(cmap)(mn)[...,:3]; al=(0.30+0.5*mn)[...,None]
     return np.clip(im*(1-al)+h*al,0,1)
@@ -141,7 +148,7 @@ else:
     for k in range(rows*cols):
         a = ax[k//cols, k%cols]; a.axis('off')
         if k < n:
-            a.imshow(disc_overlay(recs[k]))
+            a.imshow(disc_overlay(recs[k], bd=False))          # montage: no boundaries (too busy at scale)
             a.set_title(f"{cats[recs[k]['y1']].split(',')[0][:10]} / {cats[recs[k]['y2']].split(',')[0][:10]}",
                         fontsize=5.5)
     fig.legend(handles=legend, loc='lower center', ncol=2, fontsize=11, bbox_to_anchor=(0.5, -0.01))
