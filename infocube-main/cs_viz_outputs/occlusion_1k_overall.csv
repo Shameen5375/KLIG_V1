@@ -1,0 +1,8 @@
+metric,value
+images (n),1000
+SPATIAL — different regions,935  (93.5%)
+FEATURAL — same region,65  (6.5%)
+confusable ratio (mean / median),1.934 / 1.076
+random ratio (mean / median),0.354 / 0.237
+threshold (rand mean+std),0.694
+confusable > random (Wilcoxon),p = 4.0e-152
