@@ -15,6 +15,8 @@ from scipy.stats import wilcoxon
 warnings.filterwarnings('ignore')
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 1000
 POOL = sys.argv[2] if len(sys.argv) > 2 else 'cs_viz_cache/pool1000.pkl'
+TAG = '_balanced' if 'balanced' in POOL else ''             # separate outputs per pool
+def O(s): return f'cs_viz_outputs/occlusion_1k{TAG}_{s}'
 FZ_SCALE, FZ_SIGMA, FZ_MINSIZE, SEED, EPS, DR_FRAC = 0.6, 0.8, 100, 0, 1e-8, 0.25
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu'); np.random.seed(SEED)
 from torchvision.models import resnet50, ResNet50_Weights
@@ -65,7 +67,7 @@ def img_of(d): x=d['x']; return (x.squeeze(0) if x.dim()==4 else x)
 print(f'[setup] pool={POOL} using {len(pool)} images | {DEVICE}')
 
 # ── compute (lightweight checkpoint: pool_idx, y1, y2, conf, rand) ───────────────────────
-CKPT = Path('cs_viz_cache/occlusion_1k.pkl'); rows = []
+CKPT = Path(f'cs_viz_cache/occlusion_1k{TAG}.pkl'); rows = []
 if CKPT.exists(): rows = pickle.load(open(CKPT,'rb')); print(f'[resume] {len(rows)} cached')
 rng = np.random.default_rng(SEED)
 from tqdm import tqdm
@@ -100,7 +102,7 @@ overall = [['images (n)', f'{n}'],
            ['random ratio (mean / median)', f'{rand.mean():.3f} / {np.median(rand):.3f}'],
            ['threshold (rand mean+std)', f'{thr:.3f}'],
            ['confusable > random (Wilcoxon)', f'p = {pv:.1e}']]
-pd.DataFrame(overall, columns=['metric','value']).to_csv('cs_viz_outputs/occlusion_1k_overall.csv', index=False)
+pd.DataFrame(overall, columns=['metric','value']).to_csv(O('overall.csv'), index=False)
 # animal (class<398) vs object (>=398) split
 anim = np.array([r['y1'] < 398 for r in rows])
 def split_counts(mask):
@@ -118,16 +120,16 @@ t2 = ax[1].table(cellText=sup, colLabels=['super-category','n','spatial','featur
 t2.auto_set_font_size(False); t2.set_fontsize(11); t2.scale(1,1.6)
 for j in range(5): t2[0,j].set_facecolor('#34495e'); t2[0,j].set_text_props(color='white',fontweight='bold')
 ax[1].set_title('By super-category (animal vs object)', fontsize=12, fontweight='bold', pad=8)
-plt.tight_layout(); plt.savefig('cs_viz_outputs/occlusion_1k_overall_table.png', dpi=170, bbox_inches='tight'); plt.close()
-print('saved cs_viz_outputs/occlusion_1k_overall_table.png (+ .csv)')
+plt.tight_layout(); plt.savefig(O('overall_table.png'), dpi=170, bbox_inches='tight'); plt.close()
+print('saved', O('overall_table.png'), '(+ .csv)')
 
 # ── per-category table (top-1 class): spatial vs featural counts (PNG top-N + full CSV) ──
 df = pd.DataFrame([dict(category=cats[r['y1']].split(',')[0], spatial=bool(s)) for r,s in zip(rows,spatial)])
 g = df.groupby('category')['spatial'].agg(n='count', spatial='sum'); g['featural'] = g['n'] - g['spatial']
 g['pct_spatial'] = (100*g['spatial']/g['n']).round(0).astype(int)
 g = g.sort_values(['n','spatial'], ascending=False).reset_index()
-g[['category','n','spatial','featural','pct_spatial']].to_csv('cs_viz_outputs/occlusion_1k_percategory.csv', index=False)
-print(f'per-category: {len(g)} distinct top-1 categories | saved cs_viz_outputs/occlusion_1k_percategory.csv')
+g[['category','n','spatial','featural','pct_spatial']].to_csv(O('percategory.csv'), index=False)
+print(f'per-category: {len(g)} distinct top-1 categories | saved percategory.csv')
 TOPN = min(30, len(g)); gt = g.head(TOPN)
 fig, ax = plt.subplots(figsize=(9, 0.34*TOPN+1.4), facecolor='white'); ax.axis('off')
 cells = [[r.category, str(r.n), str(int(r.spatial)), str(int(r.featural)), f'{r.pct_spatial}%'] for r in gt.itertuples()]
@@ -140,8 +142,8 @@ for i in range(TOPN):
 ax.set_title(f'Spatial vs featural per category — top {TOPN} of {len(g)} categories by count (n={n})\n'
              'row shaded red if mostly SPATIAL, blue if mostly FEATURAL · full list in occlusion_1k_percategory.csv',
              fontsize=10.5, fontweight='bold', pad=10)
-plt.tight_layout(); plt.savefig('cs_viz_outputs/occlusion_1k_percategory_table.png', dpi=170, bbox_inches='tight'); plt.close()
-print('saved cs_viz_outputs/occlusion_1k_percategory_table.png')
+plt.tight_layout(); plt.savefig(O('percategory_table.png'), dpi=170, bbox_inches='tight'); plt.close()
+print('saved', O('percategory_table.png'))
 
 # ── stats figure ─────────────────────────────────────────────────────────────────────────
 fig, ax = plt.subplots(1, 2, figsize=(13, 5), facecolor='white')
@@ -158,8 +160,8 @@ ax[1].set_ylabel('regime ratio', fontsize=11); ax[1].grid(alpha=0.3, axis='y')
 ax[1].set_title(f'Confusable > random (Wilcoxon p={pv:.1e})', fontsize=12, fontweight='bold')
 plt.suptitle(f'Segment-occlusion regime analysis (n={n}): SAME region or DIFFERENT regions for the two classes?',
              fontsize=12, fontweight='bold')
-plt.tight_layout(rect=[0,0,1,0.95]); plt.savefig('cs_viz_outputs/occlusion_1k_stats.png', dpi=150, bbox_inches='tight'); plt.close()
-print('saved cs_viz_outputs/occlusion_1k_stats.png')
+plt.tight_layout(rect=[0,0,1,0.95]); plt.savefig(O('stats.png'), dpi=150, bbox_inches='tight'); plt.close()
+print('saved', O('stats.png'))
 
 # ── examples (3 most-spatial + 3 most-featural), recomputed on demand ────────────────────
 def boundaries(seg):
@@ -189,5 +191,5 @@ ax[1,0].text(-0.12,0.5,'FEATURAL\n(same region)', transform=ax[1,0].transAxes, r
              fontsize=11, fontweight='bold', color='#1f6fd6')
 plt.suptitle('Examples — red = region drives top-1, blue = drives top-2.  '
              'SPATIAL: different places · FEATURAL: same object, different features.', fontsize=11, fontweight='bold')
-plt.tight_layout(rect=[0,0,1,0.94]); plt.savefig('cs_viz_outputs/occlusion_1k_examples.png', dpi=150, bbox_inches='tight'); plt.close()
-print('saved cs_viz_outputs/occlusion_1k_examples.png')
+plt.tight_layout(rect=[0,0,1,0.94]); plt.savefig(O('examples.png'), dpi=150, bbox_inches='tight'); plt.close()
+print('saved', O('examples.png'))
