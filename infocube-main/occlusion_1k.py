@@ -175,7 +175,7 @@ def overlay(i, y1, y2):
     im = (x.cpu()*_std+_mean).clamp(0,1).permute(1,2,0).numpy()
     sgn = (np.where(disc, np.sign(diff), 0)*np.abs(diff))[seg]; mag = np.abs(sgn)/(np.abs(sgn).max()+EPS)
     al=(0.55*mag)[...,None]; col=np.where((sgn>0)[...,None], np.array([0.85,0.1,0.1]), np.array([0.1,0.3,0.9]))
-    o = np.clip(im*(1-al)+col*al,0,1); o[boundaries(seg)] = [1.0,1.0,0.0]      # yellow superpixel edges
+    o = np.clip(im*(1-al)+col*al,0,1); o[boundaries(seg)] = [0.82,0.82,0.82]      # yellow superpixel edges
     return o
 order = np.argsort(conf); featural_i = order[:3]; spatial_i = order[::-1][:3]
 fig, ax = plt.subplots(2, 3, figsize=(11, 7.6), facecolor='white')

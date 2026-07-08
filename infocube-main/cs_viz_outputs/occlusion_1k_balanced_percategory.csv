@@ -1,0 +1,821 @@
+category,n,spatial,featural,pct_spatial
+barn spider,5,5,0,100
+tobacco shop,5,5,0,100
+hot pot,4,3,1,75
+breastplate,4,2,2,50
+trombone,4,2,2,50
+Pekinese,3,3,0,100
+dhole,3,3,0,100
+home theater,3,3,0,100
+kite,3,3,0,100
+palace,3,3,0,100
+photocopier,3,3,0,100
+pot,3,3,0,100
+space bar,3,3,0,100
+trailer truck,3,3,0,100
+wardrobe,3,3,0,100
+wool,3,3,0,100
+worm fence,3,3,0,100
+cairn,3,2,1,67
+capuchin,3,2,1,67
+hair slide,3,2,1,67
+ski,3,2,1,67
+tub,3,1,2,33
+American lobster,2,2,0,100
+Bouvier des Flandres,2,2,0,100
+French loaf,2,2,0,100
+Great Pyrenees,2,2,0,100
+Greater Swiss Mountain dog,2,2,0,100
+Labrador retriever,2,2,0,100
+Polaroid camera,2,2,0,100
+Saluki,2,2,0,100
+Scotch terrier,2,2,0,100
+abaya,2,2,0,100
+aircraft carrier,2,2,0,100
+altar,2,2,0,100
+ballplayer,2,2,0,100
+barbell,2,2,0,100
+barrel,2,2,0,100
+bath towel,2,2,0,100
+bearskin,2,2,0,100
+bee,2,2,0,100
+bell cote,2,2,0,100
+bison,2,2,0,100
+black grouse,2,2,0,100
+black-and-tan coonhound,2,2,0,100
+bobsled,2,2,0,100
+bolete,2,2,0,100
+can opener,2,2,0,100
+canoe,2,2,0,100
+carpenter's kit,2,2,0,100
+cassette,2,2,0,100
+chainlink fence,2,2,0,100
+chiton,2,2,0,100
+cliff,2,2,0,100
+coil,2,2,0,100
+consomme,2,2,0,100
+crash helmet,2,2,0,100
+curly-coated retriever,2,2,0,100
+dalmatian,2,2,0,100
+dome,2,2,0,100
+drilling platform,2,2,0,100
+electric guitar,2,2,0,100
+espresso maker,2,2,0,100
+frilled lizard,2,2,0,100
+garbage truck,2,2,0,100
+green mamba,2,2,0,100
+grey whale,2,2,0,100
+ground beetle,2,2,0,100
+hen,2,2,0,100
+honeycomb,2,2,0,100
+indri,2,2,0,100
+ladybug,2,2,0,100
+lakeside,2,2,0,100
+leopard,2,2,0,100
+lesser panda,2,2,0,100
+lionfish,2,2,0,100
+lorikeet,2,2,0,100
+malinois,2,2,0,100
+maraca,2,2,0,100
+measuring cup,2,2,0,100
+megalith,2,2,0,100
+milk can,2,2,0,100
+mixing bowl,2,2,0,100
+modem,2,2,0,100
+monastery,2,2,0,100
+otterhound,2,2,0,100
+overskirt,2,2,0,100
+park bench,2,2,0,100
+passenger car,2,2,0,100
+pedestal,2,2,0,100
+plate,2,2,0,100
+plate rack,2,2,0,100
+potter's wheel,2,2,0,100
+pretzel,2,2,0,100
+purse,2,2,0,100
+recreational vehicle,2,2,0,100
+reel,2,2,0,100
+restaurant,2,2,0,100
+rock crab,2,2,0,100
+rocking chair,2,2,0,100
+sea slug,2,2,0,100
+seashore,2,2,0,100
+sewing machine,2,2,0,100
+shopping cart,2,2,0,100
+ski mask,2,2,0,100
+sleeping bag,2,2,0,100
+snail,2,2,0,100
+snowplow,2,2,0,100
+solar dish,2,2,0,100
+space shuttle,2,2,0,100
+tiger shark,2,2,0,100
+tricycle,2,2,0,100
+trifle,2,2,0,100
+trimaran,2,2,0,100
+tusker,2,2,0,100
+upright,2,2,0,100
+vending machine,2,2,0,100
+violin,2,2,0,100
+warplane,2,2,0,100
+water jug,2,2,0,100
+web site,2,2,0,100
+whippet,2,2,0,100
+window shade,2,2,0,100
+American Staffordshire terrier,2,1,1,50
+American egret,2,1,1,50
+Border collie,2,1,1,50
+Rottweiler,2,1,1,50
+Walker hound,2,1,1,50
+balloon,2,1,1,50
+common newt,2,1,1,50
+dam,2,1,1,50
+desk,2,1,1,50
+disk brake,2,1,1,50
+horizontal bar,2,1,1,50
+horned viper,2,1,1,50
+impala,2,1,1,50
+limousine,2,1,1,50
+lotion,2,1,1,50
+loudspeaker,2,1,1,50
+mud turtle,2,1,1,50
+rubber eraser,2,1,1,50
+standard schnauzer,2,1,1,50
+swimming trunks,2,1,1,50
+table lamp,2,1,1,50
+thresher,2,1,1,50
+vestment,2,1,1,50
+wild boar,2,1,1,50
+wine bottle,2,1,1,50
+American chameleon,2,0,2,0
+ear,2,0,2,0
+polecat,2,0,2,0
+tape player,2,0,2,0
+Afghan hound,1,1,0,100
+African crocodile,1,1,0,100
+African elephant,1,1,0,100
+African grey,1,1,0,100
+African hunting dog,1,1,0,100
+Airedale,1,1,0,100
+American alligator,1,1,0,100
+American black bear,1,1,0,100
+American coot,1,1,0,100
+Angora,1,1,0,100
+Arabian camel,1,1,0,100
+Arctic fox,1,1,0,100
+Band Aid,1,1,0,100
+Bedlington terrier,1,1,0,100
+Blenheim spaniel,1,1,0,100
+Border terrier,1,1,0,100
+Boston bull,1,1,0,100
+Brabancon griffon,1,1,0,100
+Brittany spaniel,1,1,0,100
+CD player,1,1,0,100
+Cardigan,1,1,0,100
+Chesapeake Bay retriever,1,1,0,100
+Chihuahua,1,1,0,100
+Christmas stocking,1,1,0,100
+Dandie Dinmont,1,1,0,100
+Dungeness crab,1,1,0,100
+Egyptian cat,1,1,0,100
+English setter,1,1,0,100
+EntleBucher,1,1,0,100
+European fire salamander,1,1,0,100
+European gallinule,1,1,0,100
+French bulldog,1,1,0,100
+French horn,1,1,0,100
+German short-haired pointer,1,1,0,100
+Gila monster,1,1,0,100
+Gordon setter,1,1,0,100
+Granny Smith,1,1,0,100
+Indian cobra,1,1,0,100
+Irish water spaniel,1,1,0,100
+Italian greyhound,1,1,0,100
+Japanese spaniel,1,1,0,100
+Komodo dragon,1,1,0,100
+Leonberg,1,1,0,100
+Loafer,1,1,0,100
+Maltese dog,1,1,0,100
+Mexican hairless,1,1,0,100
+Model T,1,1,0,100
+Newfoundland,1,1,0,100
+Norfolk terrier,1,1,0,100
+Norwegian elkhound,1,1,0,100
+Old English sheepdog,1,1,0,100
+Pembroke,1,1,0,100
+Persian cat,1,1,0,100
+Rhodesian ridgeback,1,1,0,100
+Saint Bernard,1,1,0,100
+Samoyed,1,1,0,100
+Scottish deerhound,1,1,0,100
+Sealyham terrier,1,1,0,100
+Shetland sheepdog,1,1,0,100
+Shih-Tzu,1,1,0,100
+Siamese cat,1,1,0,100
+Staffordshire bullterrier,1,1,0,100
+Sussex spaniel,1,1,0,100
+Tibetan mastiff,1,1,0,100
+Tibetan terrier,1,1,0,100
+Weimaraner,1,1,0,100
+Welsh springer spaniel,1,1,0,100
+West Highland white terrier,1,1,0,100
+Windsor tie,1,1,0,100
+Yorkshire terrier,1,1,0,100
+abacus,1,1,0,100
+academic gown,1,1,0,100
+acorn,1,1,0,100
+acorn squash,1,1,0,100
+acoustic guitar,1,1,0,100
+admiral,1,1,0,100
+agama,1,1,0,100
+agaric,1,1,0,100
+airliner,1,1,0,100
+airship,1,1,0,100
+albatross,1,1,0,100
+alligator lizard,1,1,0,100
+ambulance,1,1,0,100
+amphibian,1,1,0,100
+analog clock,1,1,0,100
+ant,1,1,0,100
+apiary,1,1,0,100
+apron,1,1,0,100
+armadillo,1,1,0,100
+artichoke,1,1,0,100
+ashcan,1,1,0,100
+axolotl,1,1,0,100
+baboon,1,1,0,100
+badger,1,1,0,100
+balance beam,1,1,0,100
+ballpoint,1,1,0,100
+banana,1,1,0,100
+banded gecko,1,1,0,100
+banjo,1,1,0,100
+bannister,1,1,0,100
+barn,1,1,0,100
+barometer,1,1,0,100
+barracouta,1,1,0,100
+barrow,1,1,0,100
+baseball,1,1,0,100
+basenji,1,1,0,100
+basketball,1,1,0,100
+bassinet,1,1,0,100
+bassoon,1,1,0,100
+bathing cap,1,1,0,100
+beach wagon,1,1,0,100
+beacon,1,1,0,100
+beagle,1,1,0,100
+beaker,1,1,0,100
+beaver,1,1,0,100
+bee eater,1,1,0,100
+bell pepper,1,1,0,100
+bib,1,1,0,100
+bighorn,1,1,0,100
+binder,1,1,0,100
+binoculars,1,1,0,100
+birdhouse,1,1,0,100
+bittern,1,1,0,100
+black and gold garden spider,1,1,0,100
+black stork,1,1,0,100
+black swan,1,1,0,100
+black widow,1,1,0,100
+black-footed ferret,1,1,0,100
+bloodhound,1,1,0,100
+bluetick,1,1,0,100
+boa constrictor,1,1,0,100
+bolo tie,1,1,0,100
+bonnet,1,1,0,100
+book jacket,1,1,0,100
+bookcase,1,1,0,100
+borzoi,1,1,0,100
+bottlecap,1,1,0,100
+bow,1,1,0,100
+bow tie,1,1,0,100
+box turtle,1,1,0,100
+boxer,1,1,0,100
+brain coral,1,1,0,100
+brambling,1,1,0,100
+brass,1,1,0,100
+briard,1,1,0,100
+broccoli,1,1,0,100
+broom,1,1,0,100
+brown bear,1,1,0,100
+buckeye,1,1,0,100
+buckle,1,1,0,100
+bulbul,1,1,0,100
+bull mastiff,1,1,0,100
+bullet train,1,1,0,100
+bulletproof vest,1,1,0,100
+burrito,1,1,0,100
+bustard,1,1,0,100
+butternut squash,1,1,0,100
+cab,1,1,0,100
+cabbage butterfly,1,1,0,100
+caldron,1,1,0,100
+cannon,1,1,0,100
+car mirror,1,1,0,100
+carbonara,1,1,0,100
+cardoon,1,1,0,100
+carousel,1,1,0,100
+carton,1,1,0,100
+castle,1,1,0,100
+catamaran,1,1,0,100
+cauliflower,1,1,0,100
+cellular telephone,1,1,0,100
+centipede,1,1,0,100
+chain,1,1,0,100
+chain mail,1,1,0,100
+chain saw,1,1,0,100
+chambered nautilus,1,1,0,100
+cheetah,1,1,0,100
+chest,1,1,0,100
+chickadee,1,1,0,100
+chimpanzee,1,1,0,100
+china cabinet,1,1,0,100
+chocolate sauce,1,1,0,100
+chow,1,1,0,100
+church,1,1,0,100
+cicada,1,1,0,100
+cleaver,1,1,0,100
+cliff dwelling,1,1,0,100
+clog,1,1,0,100
+clumber,1,1,0,100
+cocker spaniel,1,1,0,100
+cockroach,1,1,0,100
+cocktail shaker,1,1,0,100
+coffee mug,1,1,0,100
+coffeepot,1,1,0,100
+colobus,1,1,0,100
+combination lock,1,1,0,100
+comic book,1,1,0,100
+common iguana,1,1,0,100
+conch,1,1,0,100
+container ship,1,1,0,100
+coral fungus,1,1,0,100
+coral reef,1,1,0,100
+corkscrew,1,1,0,100
+cornet,1,1,0,100
+cougar,1,1,0,100
+cowboy boot,1,1,0,100
+crane,1,1,0,100
+crayfish,1,1,0,100
+crib,1,1,0,100
+croquet ball,1,1,0,100
+crossword puzzle,1,1,0,100
+crutch,1,1,0,100
+cucumber,1,1,0,100
+cup,1,1,0,100
+custard apple,1,1,0,100
+daisy,1,1,0,100
+damselfly,1,1,0,100
+dial telephone,1,1,0,100
+diamondback,1,1,0,100
+diaper,1,1,0,100
+digital clock,1,1,0,100
+dingo,1,1,0,100
+dining table,1,1,0,100
+dishrag,1,1,0,100
+dogsled,1,1,0,100
+doormat,1,1,0,100
+dowitcher,1,1,0,100
+dragonfly,1,1,0,100
+drake,1,1,0,100
+dugong,1,1,0,100
+dumbbell,1,1,0,100
+earthstar,1,1,0,100
+echidna,1,1,0,100
+eel,1,1,0,100
+eft,1,1,0,100
+electric locomotive,1,1,0,100
+electric ray,1,1,0,100
+entertainment center,1,1,0,100
+face powder,1,1,0,100
+feather boa,1,1,0,100
+fiddler crab,1,1,0,100
+fire screen,1,1,0,100
+fireboat,1,1,0,100
+flagpole,1,1,0,100
+flamingo,1,1,0,100
+flat-coated retriever,1,1,0,100
+flatworm,1,1,0,100
+flute,1,1,0,100
+fly,1,1,0,100
+folding chair,1,1,0,100
+football helmet,1,1,0,100
+fountain,1,1,0,100
+four-poster,1,1,0,100
+fox squirrel,1,1,0,100
+freight car,1,1,0,100
+fur coat,1,1,0,100
+gar,1,1,0,100
+garter snake,1,1,0,100
+gas pump,1,1,0,100
+gasmask,1,1,0,100
+geyser,1,1,0,100
+giant panda,1,1,0,100
+gibbon,1,1,0,100
+go-kart,1,1,0,100
+goblet,1,1,0,100
+golden retriever,1,1,0,100
+goldfinch,1,1,0,100
+golf ball,1,1,0,100
+golfcart,1,1,0,100
+gondola,1,1,0,100
+goose,1,1,0,100
+gorilla,1,1,0,100
+gown,1,1,0,100
+grand piano,1,1,0,100
+great grey owl,1,1,0,100
+great white shark,1,1,0,100
+greenhouse,1,1,0,100
+grey fox,1,1,0,100
+grille,1,1,0,100
+groom,1,1,0,100
+guacamole,1,1,0,100
+guenon,1,1,0,100
+guillotine,1,1,0,100
+gyromitra,1,1,0,100
+half track,1,1,0,100
+hammer,1,1,0,100
+hammerhead,1,1,0,100
+hamper,1,1,0,100
+hamster,1,1,0,100
+hand blower,1,1,0,100
+hand-held computer,1,1,0,100
+handkerchief,1,1,0,100
+hard disc,1,1,0,100
+hare,1,1,0,100
+harmonica,1,1,0,100
+harp,1,1,0,100
+hartebeest,1,1,0,100
+harvester,1,1,0,100
+harvestman,1,1,0,100
+head cabbage,1,1,0,100
+hen-of-the-woods,1,1,0,100
+hermit crab,1,1,0,100
+hip,1,1,0,100
+hippopotamus,1,1,0,100
+hog,1,1,0,100
+hognose snake,1,1,0,100
+holster,1,1,0,100
+hook,1,1,0,100
+horse cart,1,1,0,100
+hotdog,1,1,0,100
+hourglass,1,1,0,100
+house finch,1,1,0,100
+howler monkey,1,1,0,100
+hummingbird,1,1,0,100
+ibex,1,1,0,100
+ice bear,1,1,0,100
+ice lolly,1,1,0,100
+indigo bunting,1,1,0,100
+iron,1,1,0,100
+isopod,1,1,0,100
+jacamar,1,1,0,100
+jack-o'-lantern,1,1,0,100
+jackfruit,1,1,0,100
+jay,1,1,0,100
+jellyfish,1,1,0,100
+jersey,1,1,0,100
+jigsaw puzzle,1,1,0,100
+jinrikisha,1,1,0,100
+joystick,1,1,0,100
+junco,1,1,0,100
+keeshond,1,1,0,100
+kelpie,1,1,0,100
+killer whale,1,1,0,100
+kimono,1,1,0,100
+king crab,1,1,0,100
+king penguin,1,1,0,100
+king snake,1,1,0,100
+kit fox,1,1,0,100
+knee pad,1,1,0,100
+knot,1,1,0,100
+koala,1,1,0,100
+komondor,1,1,0,100
+kuvasz,1,1,0,100
+lab coat,1,1,0,100
+langur,1,1,0,100
+lawn mower,1,1,0,100
+leafhopper,1,1,0,100
+leatherback turtle,1,1,0,100
+lemon,1,1,0,100
+lens cap,1,1,0,100
+letter opener,1,1,0,100
+lifeboat,1,1,0,100
+limpkin,1,1,0,100
+liner,1,1,0,100
+lion,1,1,0,100
+lipstick,1,1,0,100
+little blue heron,1,1,0,100
+llama,1,1,0,100
+loggerhead,1,1,0,100
+lynx,1,1,0,100
+macaque,1,1,0,100
+macaw,1,1,0,100
+magnetic compass,1,1,0,100
+magpie,1,1,0,100
+mailbag,1,1,0,100
+mailbox,1,1,0,100
+maillot,1,1,0,100
+malamute,1,1,0,100
+manhole cover,1,1,0,100
+mantis,1,1,0,100
+marimba,1,1,0,100
+marmoset,1,1,0,100
+marmot,1,1,0,100
+mashed potato,1,1,0,100
+mask,1,1,0,100
+matchstick,1,1,0,100
+maypole,1,1,0,100
+meat loaf,1,1,0,100
+medicine chest,1,1,0,100
+menu,1,1,0,100
+microwave,1,1,0,100
+military uniform,1,1,0,100
+miniature pinscher,1,1,0,100
+miniature poodle,1,1,0,100
+minibus,1,1,0,100
+miniskirt,1,1,0,100
+minivan,1,1,0,100
+mink,1,1,0,100
+mitten,1,1,0,100
+mobile home,1,1,0,100
+monarch,1,1,0,100
+mongoose,1,1,0,100
+moped,1,1,0,100
+mosque,1,1,0,100
+mosquito net,1,1,0,100
+mountain bike,1,1,0,100
+mountain tent,1,1,0,100
+mousetrap,1,1,0,100
+moving van,1,1,0,100
+muzzle,1,1,0,100
+nail,1,1,0,100
+neck brace,1,1,0,100
+necklace,1,1,0,100
+nematode,1,1,0,100
+nipple,1,1,0,100
+oboe,1,1,0,100
+ocarina,1,1,0,100
+odometer,1,1,0,100
+orange,1,1,0,100
+orangutan,1,1,0,100
+organ,1,1,0,100
+oscilloscope,1,1,0,100
+ostrich,1,1,0,100
+otter,1,1,0,100
+ox,1,1,0,100
+oystercatcher,1,1,0,100
+packet,1,1,0,100
+paddlewheel,1,1,0,100
+padlock,1,1,0,100
+pajama,1,1,0,100
+panpipe,1,1,0,100
+papillon,1,1,0,100
+parachute,1,1,0,100
+parking meter,1,1,0,100
+partridge,1,1,0,100
+patas,1,1,0,100
+peacock,1,1,0,100
+pelican,1,1,0,100
+pencil box,1,1,0,100
+pencil sharpener,1,1,0,100
+perfume,1,1,0,100
+pick,1,1,0,100
+pickelhaube,1,1,0,100
+picket fence,1,1,0,100
+pickup,1,1,0,100
+piggy bank,1,1,0,100
+pill bottle,1,1,0,100
+pillow,1,1,0,100
+pineapple,1,1,0,100
+ping-pong ball,1,1,0,100
+pinwheel,1,1,0,100
+pizza,1,1,0,100
+plane,1,1,0,100
+planetarium,1,1,0,100
+plastic bag,1,1,0,100
+platypus,1,1,0,100
+plunger,1,1,0,100
+police van,1,1,0,100
+pomegranate,1,1,0,100
+poncho,1,1,0,100
+pool table,1,1,0,100
+pop bottle,1,1,0,100
+porcupine,1,1,0,100
+potpie,1,1,0,100
+prairie chicken,1,1,0,100
+prayer rug,1,1,0,100
+prison,1,1,0,100
+proboscis monkey,1,1,0,100
+ptarmigan,1,1,0,100
+puck,1,1,0,100
+puffer,1,1,0,100
+pug,1,1,0,100
+quail,1,1,0,100
+quill,1,1,0,100
+racer,1,1,0,100
+radiator,1,1,0,100
+radio,1,1,0,100
+radio telescope,1,1,0,100
+rain barrel,1,1,0,100
+ram,1,1,0,100
+rapeseed,1,1,0,100
+red-backed sandpiper,1,1,0,100
+red-breasted merganser,1,1,0,100
+redshank,1,1,0,100
+reflex camera,1,1,0,100
+remote control,1,1,0,100
+revolver,1,1,0,100
+rhinoceros beetle,1,1,0,100
+rifle,1,1,0,100
+ringlet,1,1,0,100
+ringneck snake,1,1,0,100
+robin,1,1,0,100
+rock python,1,1,0,100
+rotisserie,1,1,0,100
+ruddy turnstone,1,1,0,100
+ruffed grouse,1,1,0,100
+rugby ball,1,1,0,100
+rule,1,1,0,100
+running shoe,1,1,0,100
+safe,1,1,0,100
+safety pin,1,1,0,100
+saltshaker,1,1,0,100
+sandal,1,1,0,100
+sandbar,1,1,0,100
+scabbard,1,1,0,100
+schipperke,1,1,0,100
+school bus,1,1,0,100
+schooner,1,1,0,100
+scoreboard,1,1,0,100
+scorpion,1,1,0,100
+screw,1,1,0,100
+screwdriver,1,1,0,100
+sea anemone,1,1,0,100
+sea lion,1,1,0,100
+sea snake,1,1,0,100
+sea urchin,1,1,0,100
+seat belt,1,1,0,100
+shoe shop,1,1,0,100
+shoji,1,1,0,100
+shower cap,1,1,0,100
+shower curtain,1,1,0,100
+sidewinder,1,1,0,100
+silky terrier,1,1,0,100
+skunk,1,1,0,100
+slide rule,1,1,0,100
+slot,1,1,0,100
+snorkel,1,1,0,100
+snowmobile,1,1,0,100
+soap dispenser,1,1,0,100
+soccer ball,1,1,0,100
+sock,1,1,0,100
+sombrero,1,1,0,100
+sorrel,1,1,0,100
+soup bowl,1,1,0,100
+space heater,1,1,0,100
+spaghetti squash,1,1,0,100
+speedboat,1,1,0,100
+spindle,1,1,0,100
+spoonbill,1,1,0,100
+sports car,1,1,0,100
+spotlight,1,1,0,100
+spotted salamander,1,1,0,100
+squirrel monkey,1,1,0,100
+stage,1,1,0,100
+standard poodle,1,1,0,100
+starfish,1,1,0,100
+steam locomotive,1,1,0,100
+steel arch bridge,1,1,0,100
+steel drum,1,1,0,100
+stinkhorn,1,1,0,100
+stole,1,1,0,100
+stone wall,1,1,0,100
+stopwatch,1,1,0,100
+stove,1,1,0,100
+strainer,1,1,0,100
+strawberry,1,1,0,100
+street sign,1,1,0,100
+streetcar,1,1,0,100
+stretcher,1,1,0,100
+studio couch,1,1,0,100
+stupa,1,1,0,100
+submarine,1,1,0,100
+sulphur-crested cockatoo,1,1,0,100
+suspension bridge,1,1,0,100
+swab,1,1,0,100
+swing,1,1,0,100
+switch,1,1,0,100
+syringe,1,1,0,100
+tailed frog,1,1,0,100
+tank,1,1,0,100
+tarantula,1,1,0,100
+teddy,1,1,0,100
+television,1,1,0,100
+tench,1,1,0,100
+tennis ball,1,1,0,100
+thatch,1,1,0,100
+theater curtain,1,1,0,100
+three-toed sloth,1,1,0,100
+thunder snake,1,1,0,100
+tick,1,1,0,100
+tiger beetle,1,1,0,100
+tiger cat,1,1,0,100
+titi,1,1,0,100
+toaster,1,1,0,100
+toilet seat,1,1,0,100
+torch,1,1,0,100
+totem pole,1,1,0,100
+toucan,1,1,0,100
+tow truck,1,1,0,100
+toy terrier,1,1,0,100
+tractor,1,1,0,100
+tree frog,1,1,0,100
+triceratops,1,1,0,100
+trilobite,1,1,0,100
+tripod,1,1,0,100
+triumphal arch,1,1,0,100
+trolleybus,1,1,0,100
+turnstile,1,1,0,100
+umbrella,1,1,0,100
+unicycle,1,1,0,100
+vase,1,1,0,100
+vault,1,1,0,100
+vine snake,1,1,0,100
+vizsla,1,1,0,100
+volcano,1,1,0,100
+volleyball,1,1,0,100
+waffle iron,1,1,0,100
+walking stick,1,1,0,100
+wallaby,1,1,0,100
+wallet,1,1,0,100
+washbasin,1,1,0,100
+washer,1,1,0,100
+water buffalo,1,1,0,100
+water ouzel,1,1,0,100
+water tower,1,1,0,100
+weevil,1,1,0,100
+whiptail,1,1,0,100
+whiskey jug,1,1,0,100
+whistle,1,1,0,100
+white stork,1,1,0,100
+white wolf,1,1,0,100
+wire-haired fox terrier,1,1,0,100
+wombat,1,1,0,100
+wreck,1,1,0,100
+yawl,1,1,0,100
+yellow lady's slipper,1,1,0,100
+zebra,1,1,0,100
+zucchini,1,1,0,100
+Bernese mountain dog,1,0,1,0
+English foxhound,1,0,1,0
+English springer,1,0,1,0
+Kerry blue terrier,1,0,1,0
+Lakeland terrier,1,0,1,0
+Lhasa,1,0,1,0
+Petri dish,1,0,1,0
+Siberian husky,1,0,1,0
+affenpinscher,1,0,1,0
+anemone fish,1,0,1,0
+assault rifle,1,0,1,0
+brassiere,1,0,1,0
+butcher shop,1,0,1,0
+cash machine,1,0,1,0
+cinema,1,0,1,0
+computer keyboard,1,0,1,0
+convertible,1,0,1,0
+coucal,1,0,1,0
+cradle,1,0,1,0
+cricket,1,0,1,0
+drumstick,1,0,1,0
+eggnog,1,0,1,0
+fountain pen,1,0,1,0
+gong,1,0,1,0
+grasshopper,1,0,1,0
+hyena,1,0,1,0
+jaguar,1,0,1,0
+lycaenid,1,0,1,0
+meerkat,1,0,1,0
+missile,1,0,1,0
+mortar,1,0,1,0
+mortarboard,1,0,1,0
+motor scooter,1,0,1,0
+night snake,1,0,1,0
+notebook,1,0,1,0
+obelisk,1,0,1,0
+oxcart,1,0,1,0
+paper towel,1,0,1,0
+punching bag,1,0,1,0
+red fox,1,0,1,0
+redbone,1,0,1,0
+snow leopard,1,0,1,0
+soft-coated wheaten terrier,1,0,1,0
+spider web,1,0,1,0
+stingray,1,0,1,0
+sulphur butterfly,1,0,1,0
+toyshop,1,0,1,0
+tray,1,0,1,0
+valley,1,0,1,0
+water snake,1,0,1,0
+wood rabbit,1,0,1,0
+yurt,1,0,1,0

@@ -1,0 +1,23 @@
+category,n,spatial,featural,pct_spatial
+other object,118,105,13,89
+dog,109,95,14,87
+other,78,72,6,92
+device/appliance,77,68,9,88
+vehicle,72,66,6,92
+other mammal,65,56,9,86
+structure/building,58,53,5,91
+other animal,58,56,2,97
+bird,52,50,2,96
+container,49,44,5,90
+clothing,45,41,4,91
+insect/arthropod,39,35,4,90
+food/produce,37,35,2,95
+furniture,26,23,3,88
+musical instrument,25,22,3,88
+snake,18,15,3,83
+reptile,18,15,3,83
+primate,15,15,0,100
+invertebrate,13,13,0,100
+fish,12,10,2,83
+amphibian,9,8,1,89
+tool,7,7,0,100

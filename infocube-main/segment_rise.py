@@ -55,27 +55,31 @@ def get_segments(x, scale=FZ_SCALE, sigma=FZ_SIGMA, min_size=FZ_MINSIZE):
 @torch.no_grad()
 def segment_rise_region(model, x, segments, y1, y2, N=2000, p_on=0.5, frac=DR_FRAC, batch=64, seed=SEED):
     """x: (3,H,W) normalized. segments: (H,W) int labels 0..K-1.
-    Random SEGMENT masks (keep subset of segments ON); per-segment importance = avg class
-    score when that segment is present. Returns disc (imp_y1-imp_y2), region mask R, imp1, imp2."""
+    Random SEGMENT masks (keep subset of segments ON). Per-segment importance is the CENTERED
+    RISE score:  r = mean(score | segment ON) - mean(score | segment OFF)  (analogous to the
+    occlusion drop, but capturing interactions). Returns disc (r1-r2), region R, r1, r2."""
     dev = x.device; K = int(segments.max()) + 1
     seg_t = torch.from_numpy(segments.astype(np.int64)).to(dev)                 # (H,W)
     rng = np.random.default_rng(seed)
-    acc1 = np.zeros(K); acc2 = np.zeros(K); cnt = np.zeros(K); done = 0
+    on1=np.zeros(K); on2=np.zeros(K); cn=np.zeros(K)                            # accumulators when ON
+    of1=np.zeros(K); of2=np.zeros(K); cf=np.zeros(K); done=0                    # accumulators when OFF
     while done < N:
         b = min(batch, N - done)
-        on = rng.random((b, K)) < p_on                                         # (b,K) which segments ON
+        on = rng.random((b, K)) < p_on; off = ~on                              # (b,K)
         on_t = torch.from_numpy(on).float().to(dev)
         masks = on_t[:, seg_t]                                                  # (b,H,W) paint per-segment on/off
         masked = x.unsqueeze(0) * masks.unsqueeze(1)                            # (b,3,H,W)  (OFF segments -> 0)
         p = F.softmax(model(masked), -1)
         s1 = p[:, y1].cpu().numpy(); s2 = p[:, y2].cpu().numpy()                # (b,)
-        acc1 += (s1[:, None] * on).sum(0); acc2 += (s2[:, None] * on).sum(0); cnt += on.sum(0)
+        on1 += (s1[:,None]*on).sum(0); on2 += (s2[:,None]*on).sum(0); cn += on.sum(0)
+        of1 += (s1[:,None]*off).sum(0); of2 += (s2[:,None]*off).sum(0); cf += off.sum(0)
         done += b
-    imp1 = acc1 / np.maximum(cnt, 1); imp2 = acc2 / np.maximum(cnt, 1)
-    disc = imp1 - imp2                                                          # per-segment discriminative score
+    r1 = on1/np.maximum(cn,1) - of1/np.maximum(cf,1)                            # centered importance for y1
+    r2 = on2/np.maximum(cn,1) - of2/np.maximum(cf,1)                            # centered importance for y2
+    disc = r1 - r2                                                             # per-segment discriminative score
     k_top = max(1, int(frac * K)); top = np.argsort(np.abs(disc))[-k_top:]
     R = np.isin(segments, top)                                                  # binary pixel region
-    return disc, R, imp1, imp2
+    return disc, R, r1, r2
 
 # ── standalone segment-RISE region viz ──────────────────────────────────────────────────
 def boundaries(seg):
@@ -88,7 +92,7 @@ def region_overlay(im, segments, disc, frac=DR_FRAC):
     rd = np.zeros(K); rd[top] = disc[top]; sgn = rd[segments]
     mag = np.abs(sgn)/(np.abs(sgn).max()+EPS); al=(0.55*mag)[...,None]
     col = np.where((sgn>0)[...,None], np.array([0.85,0.1,0.1]), np.array([0.1,0.3,0.9]))
-    o = np.clip(im*(1-al)+col*al, 0, 1); o[boundaries(segments)] = [1.0,1.0,0.0]
+    o = np.clip(im*(1-al)+col*al, 0, 1); o[boundaries(segments)] = [0.82,0.82,0.82]
     return o
 
 if __name__ == '__main__':
