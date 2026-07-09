@@ -69,6 +69,19 @@ coh_curve = np.array(coh_curve)
 rp = {k: float(np.mean([fn(unit(np.random.randn(H,W)), unit(np.random.randn(H,W))) for _ in range(40)])) for k,fn in DIFF.items()}
 print('random-pair calibration (unrelated maps):', {k: round(v,3) for k,v in rp.items()})
 
+cmap = plt.get_cmap('tab10')
+def plot_diff(ax, suffix=''):
+    """Plot each difference metric ÷ its random baseline, MERGING curves that coincide
+    (e.g. cosine == corr for zero-mean maps) into one labelled line so none is hidden."""
+    plotted = []
+    for k, v in curves.items():
+        y = np.array(v)/(rp[k]+EPS)
+        m = next((p for p in plotted if np.allclose(p[0], y, atol=2e-3)), None)
+        if m: m[2].append(k)
+        else:
+            line, = ax.plot(alphas, y, '-o', ms=4, color=cmap(len(plotted))); plotted.append([y, line, [k]])
+    for y, line, names in plotted: line.set_label(' = '.join(names) + suffix)
+
 # ── figure (difference metric ONLY — no coherence curve; the fix comes in a later section) ─
 fig = plt.figure(figsize=(15, 5.2), facecolor='white')
 gs = fig.add_gridspec(1, 3, width_ratios=[1, 1, 2.1], wspace=0.28)
@@ -80,9 +93,8 @@ axn.set_title('noise class-difference\n(identical energy)', fontsize=11, fontwei
 txt = 'SAME energy →\nSAME difference score:\n\n' + '\n'.join(f'{n:11s} {sc:.3f} = {sn:.3f}' for n,sc,sn in rows)
 axn.text(1.05, 0.5, txt, transform=axn.transAxes, va='center', ha='left', fontsize=8.5, family='monospace',
          bbox=dict(boxstyle='round', fc='#f5f5f5', ec='#999'))
-axs = fig.add_subplot(gs[2]); cmap = plt.get_cmap('tab10')
-for j, (k, v) in enumerate(curves.items()):
-    axs.plot(alphas, np.array(v)/(rp[k]+EPS), '-o', ms=3, color=cmap(j), label=k)
+axs = fig.add_subplot(gs[2])
+plot_diff(axs)
 axs.axhline(1.0, color='k', ls='--', lw=1.8, label='independent random-pair baseline')
 axs.set_xlabel('α   (0 = pure structure  →  1 = pure noise)', fontsize=11)
 axs.set_ylabel('difference score / random-pair baseline', fontsize=11); axs.set_ylim(0, 1.15)
@@ -121,8 +133,7 @@ axc2.set_title(f'structured class-difference\ncoherence difference = {cd_coh:.2f
 axn2 = fig2.add_subplot(gs2[1]); axn2.imshow(d_noise, cmap='RdBu_r', vmin=-vmax, vmax=vmax); axn2.axis('off')
 axn2.set_title(f'noise class-difference\ncoherence difference = {cd_noise:.3f}', fontsize=11, fontweight='bold', color='#1f6fd6')
 axs2 = fig2.add_subplot(gs2[2])
-for j, (k, v) in enumerate(curves.items()):                                    # difference metrics ÷ random baseline
-    axs2.plot(alphas, np.array(v)/(rp[k]+EPS), '-o', ms=3, color=cmap(j), label=f'{k} (difference — flat)')
+plot_diff(axs2, suffix=' (difference — flat)')                                  # merges coincident cosine/corr
 axs2.plot(alphas, coh_curve/(coh_curve[0]+EPS), '-s', color='#127a12', lw=3.5, ms=6, label='coherence difference (proposed)')
 axs2.set_xlabel('α   (0 = pure structure  →  1 = pure noise),  energy held CONSTANT', fontsize=11)
 axs2.set_ylabel('metric score  (normalized to [0,1])', fontsize=11); axs2.set_ylim(-0.05, 1.15)
