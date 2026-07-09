@@ -99,7 +99,7 @@ axs.axhline(1.0, color='k', ls='--', lw=1.8, label='random-pair baseline')
 axs.set_xlabel('α   (0 = pure structure  →  1 = pure noise)', fontsize=11)
 axs.set_ylabel('difference score / random-pair baseline', fontsize=11); axs.set_ylim(0, 1.15)
 axs.set_title('Constant-energy sweep', fontsize=12, fontweight='bold')
-axs.grid(alpha=0.3); axs.legend(fontsize=9, loc='center right')
+axs.grid(alpha=0.3); axs.legend(fontsize=9, loc='upper right')
 axs.text(0.03, 0.06,
          'ENERGY (magnitude) held CONSTANT along the sweep.\nThe only variable is spatial coherence.\n'
          '→ magnitude cannot explain the flat line;\n   the metric is blind to coherence itself.',
@@ -135,7 +135,7 @@ axs2.plot(alphas, coh_curve/(coh_curve[0]+EPS), '-s', color='#127a12', lw=3.5, m
 axs2.set_xlabel('α   (0 = pure structure  →  1 = pure noise)', fontsize=11)
 axs2.set_ylabel('metric score  (normalized to [0,1])', fontsize=11); axs2.set_ylim(-0.05, 1.15)
 axs2.set_title('Constant-energy sweep', fontsize=12, fontweight='bold')
-axs2.grid(alpha=0.3); axs2.legend(fontsize=9, loc='center left')
+axs2.grid(alpha=0.3); axs2.legend(fontsize=9, loc='upper right')
 fig2.suptitle('A coherence-difference metric is not gameable by noise.', fontsize=13.5, fontweight='bold')
 fig2.text(0.5, 0.055, r"coherence difference:  $CD=\frac{\|\,G_\sigma * (A_1-A_2)\,\|^{2}}{\|A_1-A_2\|^{2}}$"
           r"      ($G_\sigma$ = Gaussian blur, $\sigma=4$)      high for structure, $\approx 0$ for noise",
