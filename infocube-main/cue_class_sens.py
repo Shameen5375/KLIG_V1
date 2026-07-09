@@ -79,7 +79,7 @@ def class_differential(model, x_np, Rb, y1, y2):
 def blend(img, alt, Rb): m = Rb[None].astype(float); return img*(1-m) + alt*m
 def remove_texture(img, Rb): return blend(img, np.stack([median_filter(img[c], size=5) for c in range(3)]), Rb)
 def remove_edge(img, Rb):    return blend(img, np.stack([gaussian_filter(img[c], sigma=4) for c in range(3)]), Rb)
-def smooth_warp(img, rng, strength=15, sigma=8):
+def smooth_warp(img, rng, strength=35, sigma=10):
     H,W = img.shape[1:]; yy,xx = np.mgrid[0:H,0:W]
     dx = gaussian_filter(rng.standard_normal((H,W)), sigma)*strength
     dy = gaussian_filter(rng.standard_normal((H,W)), sigma)*strength

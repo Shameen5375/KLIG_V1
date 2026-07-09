@@ -45,7 +45,7 @@ def out_region(dd, labs, seg, area):
         M |= (seg == l)
         if M.sum() >= area: break
     return M
-def smooth_warp(a, strength=15, sigma=8):
+def smooth_warp(a, strength=35, sigma=10):
     C, H, W = a.shape; yy, xx = np.mgrid[0:H, 0:W]
     dx = gaussian_filter(rng.standard_normal((H, W)), sigma) * strength
     dy = gaussian_filter(rng.standard_normal((H, W)), sigma) * strength

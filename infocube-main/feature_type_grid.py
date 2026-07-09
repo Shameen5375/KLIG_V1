@@ -36,7 +36,7 @@ def disc(m, x, a, b, seg, labs, chunk=24):
         d[s:s+p.shape[0]] = np.abs((b1 - p[:, a].cpu().numpy()) - (b2 - p[:, b].cpu().numpy()))
     dd = d >= np.quantile(d, 0.75) if np.ptp(d) > EPS else np.zeros(len(d), bool)
     return np.isin(seg, labs[dd])
-def smooth_warp(a, strength=15, sigma=8):
+def smooth_warp(a, strength=35, sigma=10):
     C, H, W = a.shape; yy, xx = np.mgrid[0:H, 0:W]
     dx = gaussian_filter(rng.standard_normal((H, W)), sigma) * strength
     dy = gaussian_filter(rng.standard_normal((H, W)), sigma) * strength
