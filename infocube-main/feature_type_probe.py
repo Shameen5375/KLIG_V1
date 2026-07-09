@@ -133,3 +133,28 @@ ax.set_title('What cue does each architecture rely on in its discriminative regi
 ax.legend(fontsize=8.5, ncol=2); ax.axhline(0, color='k', lw=0.6)
 plt.tight_layout(); plt.savefig('cs_viz_outputs/feature_type_probe.png', dpi=170, bbox_inches='tight'); plt.close()
 print('\nsaved cs_viz_outputs/feature_type_probe.png')
+
+# ── raw results + clean table PNG ─────────────────────────────────────────────────────────
+pickle.dump(res, open('cs_viz_cache/feature_type_probe_res.pkl', 'wb'))
+figt, axt = plt.subplots(figsize=(14.5, 2.8), facecolor='white'); axt.axis('off')
+cells = []
+for mn in MODELS:
+    row = [mn]
+    for c in CUES:
+        im, ise = ms(res[mn][c]['in']); om, ose = ms(res[mn][c]['out'])
+        row.append(f'{im:+.3f} ± {ise:.3f}   /   {om:+.3f} ± {ose:.3f}')
+    cells.append(row)
+tb = axt.table(cellText=cells, colLabels=['model'] + [f'{c.upper()}\n(inside R  /  outside R control)' for c in CUES],
+               cellLoc='center', loc='center')
+tb.auto_set_font_size(False); tb.set_fontsize(10); tb.scale(1, 2.1)
+for j in range(len(CUES)+1): tb[0,j].set_facecolor('#34495e'); tb[0,j].set_text_props(color='white', fontweight='bold')
+# highlight the R-specific winner (largest inside-minus-outside) per model
+for i, mn in enumerate(MODELS):
+    diffs = [ms(res[mn][c]['in'])[0] - ms(res[mn][c]['out'])[0] for c in CUES]
+    jbest = int(np.argmax(diffs))
+    tb[i+1, jbest+1].set_facecolor('#cfe3f5'); tb[i+1, jbest+1].set_text_props(fontweight='bold')
+axt.set_title(f'Cue reliance in the discriminative region R — margin drop Δ[p(y1)−p(y2)] ± SE (n={N})\n'
+              'inside R vs equal-area outside-R control · highlighted = most R-specific cue per model',
+              fontsize=11, fontweight='bold', pad=10)
+plt.tight_layout(); plt.savefig('cs_viz_outputs/feature_type_probe_table.png', dpi=170, bbox_inches='tight'); plt.close()
+print('saved cs_viz_outputs/feature_type_probe_table.png (+ raw res pkl)')
