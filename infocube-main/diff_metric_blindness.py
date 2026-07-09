@@ -98,7 +98,7 @@ plot_diff(axs)
 axs.axhline(1.0, color='k', ls='--', lw=1.8, label='independent random-pair baseline')
 axs.set_xlabel('α   (0 = pure structure  →  1 = pure noise)', fontsize=11)
 axs.set_ylabel('difference score / random-pair baseline', fontsize=11); axs.set_ylim(0, 1.15)
-axs.set_title('Every difference metric is FLAT across the coherence sweep', fontsize=12, fontweight='bold')
+axs.set_title('Constant-energy sweep', fontsize=12, fontweight='bold')
 axs.grid(alpha=0.3); axs.legend(fontsize=9, loc='center right')
 axs.text(0.03, 0.06,
          'ENERGY (magnitude) held CONSTANT along the sweep.\nThe only variable is spatial coherence.\n'
@@ -106,13 +106,12 @@ axs.text(0.03, 0.06,
          transform=axs.transAxes, va='bottom', ha='left', fontsize=9,
          bbox=dict(boxstyle='round', fc='#fff6e0', ec='#d9a441'))
 plt.suptitle('Difference-based class sensitivity is gameable by noise.', fontsize=13.5, fontweight='bold')
-fig.text(0.5, 0.02,
-         "What we're plotting: the class-difference map is morphed from a clean structured pattern (α=0) to pure noise (α=1) "
-         "with total magnitude (energy) held constant;\neach line is one difference metric's score along that morph "
-         "(÷ its two-unrelated-maps value). The lines stay flat → the metric scores noise exactly like structure.",
-         ha='center', va='bottom', fontsize=10, style='italic', color='#333')
-plt.tight_layout(rect=[0,0.085,1,0.94]); out='cs_viz_outputs/diff_metric_blindness.png'
-plt.savefig(out, dpi=150, bbox_inches='tight'); plt.close()
+fig.text(0.5, 0.055, r"difference metric (cosine):  $D=1-\frac{\langle A_1,\,A_2\rangle}{\|A_1\|\,\|A_2\|}$"
+         r"       energy $\|A_1-A_2\|$ held constant across the sweep",
+         ha='center', va='bottom', fontsize=12)
+fig.subplots_adjust(left=0.02, right=0.99, top=0.89, bottom=0.24, wspace=0.28)
+out='cs_viz_outputs/diff_metric_blindness.png'
+plt.savefig(out, dpi=150); plt.close()
 flat = max(abs(np.array(v)[-1]-np.array(v)[0])/(rp[k]+EPS) for k,v in curves.items())
 print(f'sweep: difference metrics drift <= {100*flat:.1f}% of the random-pair scale, structure->noise')
 print(f'(console-only: coherence falls {100*(1-coh_curve[-1]/coh_curve[0]):.0f}% over the same sweep)')
@@ -127,24 +126,22 @@ cd_coh, cd_noise = coherence(d_coh), coherence(d_noise)
 fig2 = plt.figure(figsize=(15, 5.4), facecolor='white')
 gs2 = fig2.add_gridspec(1, 3, width_ratios=[1, 1, 2.1], wspace=0.28)
 axc2 = fig2.add_subplot(gs2[0]); axc2.imshow(d_coh, cmap='RdBu_r', vmin=-vmax, vmax=vmax); axc2.axis('off')
-axc2.set_title(f'structured class-difference\ncoherence difference = {cd_coh:.2f}', fontsize=11, fontweight='bold', color='#b00020')
+axc2.set_title('structured class-difference', fontsize=11, fontweight='bold', color='#b00020')
 axn2 = fig2.add_subplot(gs2[1]); axn2.imshow(d_noise, cmap='RdBu_r', vmin=-vmax, vmax=vmax); axn2.axis('off')
-axn2.set_title(f'noise class-difference\ncoherence difference = {cd_noise:.3f}', fontsize=11, fontweight='bold', color='#1f6fd6')
+axn2.set_title('noise class-difference\n(identical energy)', fontsize=11, fontweight='bold', color='#1f6fd6')
 axs2 = fig2.add_subplot(gs2[2])
 plot_diff(axs2, suffix=' (difference — flat)')                                  # merges coincident cosine/corr
 axs2.plot(alphas, coh_curve/(coh_curve[0]+EPS), '-s', color='#127a12', lw=3.5, ms=6, label='coherence difference (proposed)')
-axs2.set_xlabel('α   (0 = pure structure  →  1 = pure noise),  energy held CONSTANT', fontsize=11)
+axs2.set_xlabel('α   (0 = pure structure  →  1 = pure noise)', fontsize=11)
 axs2.set_ylabel('metric score  (normalized to [0,1])', fontsize=11); axs2.set_ylim(-0.05, 1.15)
-axs2.set_title('Coherence difference collapses on noise; difference metrics stay flat', fontsize=12, fontweight='bold')
+axs2.set_title('Constant-energy sweep', fontsize=12, fontweight='bold')
 axs2.grid(alpha=0.3); axs2.legend(fontsize=9, loc='center left')
 fig2.suptitle('A coherence-difference metric is not gameable by noise.', fontsize=13.5, fontweight='bold')
-fig2.text(0.5, 0.02,
-          "What we're plotting: the same morph (structure → noise, constant energy). "
-          "The green line (coherence difference) measures how spatially coherent the class-difference is, so it falls "
-          "from high (structure) to ~0 (noise);\nthe difference-metric lines stay flat. "
-          "Only the coherence-difference metric tells structure and noise apart.",
-          ha='center', va='bottom', fontsize=10, style='italic', color='#333')
-plt.tight_layout(rect=[0,0.085,1,0.94]); out2='cs_viz_outputs/coherence_difference_payoff.png'
-plt.savefig(out2, dpi=150, bbox_inches='tight'); plt.close()
+fig2.text(0.5, 0.055, r"coherence difference:  $CD=\frac{\|\,G_\sigma * (A_1-A_2)\,\|^{2}}{\|A_1-A_2\|^{2}}$"
+          r"      ($G_\sigma$ = Gaussian blur, $\sigma=4$)      high for structure, $\approx 0$ for noise",
+          ha='center', va='bottom', fontsize=12)
+fig2.subplots_adjust(left=0.02, right=0.99, top=0.89, bottom=0.24, wspace=0.28)
+out2='cs_viz_outputs/coherence_difference_payoff.png'
+plt.savefig(out2, dpi=150); plt.close()
 print(f'coherence difference: structured={cd_coh:.3f}  noise={cd_noise:.3f}  (difference metrics saw them as identical)')
 print('saved', out2)
