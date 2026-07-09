@@ -13,7 +13,7 @@ import sys, pickle, warnings
 try: sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 except Exception: pass
 import numpy as np, torch, torch.nn.functional as F
-from scipy.ndimage import gaussian_filter, median_filter
+from scipy.ndimage import gaussian_filter, median_filter, map_coordinates
 warnings.filterwarnings('ignore')
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 50
 EPS = 1e-8; DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -59,15 +59,16 @@ def out_region(disc, labs, seg, area):                         # equal-area NON-
     return M
 
 # ── cue-specific perturbations (numpy, C,H,W) ──
-def grid_shuffle(a, tile=28):
-    C, H, W = a.shape; nh, nw = H // tile, W // tile
-    t = a[:, :nh*tile, :nw*tile].reshape(C, nh, tile, nw, tile).transpose(0, 1, 3, 2, 4).reshape(C, nh*nw, tile, tile)
-    t = t[:, rng.permutation(nh*nw)]
-    return t.reshape(C, nh, nw, tile, tile).transpose(0, 1, 3, 2, 4).reshape(C, nh*tile, nw*tile)
+def smooth_warp(a, strength=15, sigma=8):
+    C, H, W = a.shape; yy, xx = np.mgrid[0:H, 0:W]
+    dx = gaussian_filter(rng.standard_normal((H, W)), sigma) * strength
+    dy = gaussian_filter(rng.standard_normal((H, W)), sigma) * strength
+    crd = [np.clip(yy + dy, 0, H - 1), np.clip(xx + dx, 0, W - 1)]
+    return np.stack([map_coordinates(a[c], crd, order=1, mode='reflect') for c in range(C)])
 def perturbed(a, kind):
     if kind == 'texture': return median_filter(a, size=(1, 5, 5))   # removes fine texture, KEEPS edges/shape
     if kind == 'edge':    return gaussian_filter(a, sigma=(0, 4, 4)) # removes edges, keeps coarse shape/colour
-    if kind == 'shape':   return grid_shuffle(a, 28)                 # destroys global shape, keeps local texture
+    if kind == 'shape':   return smooth_warp(a)                      # elastic warp: distorts shape, injects NO edges
 def apply_in(a, M, kind):
     p = perturbed(a, kind); m = M.astype(float)[None]
     return a * (1 - m) + p * m
