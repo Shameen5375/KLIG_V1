@@ -107,3 +107,28 @@ axv.text(0.035, 0.90, f'Spearman ρ(planted, CS_struct) = {rho_m:.3f} ± {rho_se
 axv.grid(alpha=0.3); axv.legend(fontsize=10, loc='lower right'); axv.set_ylim(-0.03, 1.05)
 plt.tight_layout(); outv='cs_viz_outputs/cs_v2_rank_recovery.png'
 plt.savefig(outv, dpi=140, bbox_inches='tight'); plt.close(); print('saved', outv)
+
+# ── standalone Validation-3 plot (agreement + principled divergence) ─────────────────────
+fig3, ax3 = plt.subplots(1, 2, figsize=(12.5, 5.0), facecolor='white')
+ax3[0].plot(alphas, cs_s, '-o', color='#127a12', lw=2.8, ms=6, label='CS_struct (coherence)')
+ax3[0].plot(alphas, hit_s, '-s', color='#1f6fd6', lw=2.8, ms=6, label='region-hit (localization)')
+ax3[0].set_xlabel('planted coherence level  (0 = noise → 1 = structure)', fontsize=11)
+ax3[0].set_ylabel('score', fontsize=11); ax3[0].set_ylim(-0.03, 1.08)
+ax3[0].set_title(f'Agreement where expected\nPearson r(CS_struct, region-hit) = {r_agree:.2f}',
+                 fontsize=12, fontweight='bold'); ax3[0].grid(alpha=0.3); ax3[0].legend(fontsize=10, loc='upper left')
+
+cases = ['coherent in R', 'noise in R']; xx3 = np.arange(2); w = 0.36
+ax3[1].bar(xx3-w/2, [cs_coh, cs_nR], w, color='#127a12', label='CS_struct')
+ax3[1].bar(xx3+w/2, [hit_coh, hit_nR], w, color='#1f6fd6', label='region-hit')
+for i,(c,h) in enumerate([(cs_coh,hit_coh),(cs_nR,hit_nR)]):
+    ax3[1].text(i-w/2, c+0.02, f'{c:.2f}', ha='center', fontsize=9, color='#127a12', fontweight='bold')
+    ax3[1].text(i+w/2, h+0.02, f'{h:.2f}', ha='center', fontsize=9, color='#1f6fd6', fontweight='bold')
+ax3[1].set_xticks(xx3); ax3[1].set_xticklabels(cases, fontsize=11); ax3[1].set_ylim(0, 1.15)
+ax3[1].set_title('Divergence where CS_struct is stronger\nnoise-in-R fools region-hit; CS_struct floors',
+                 fontsize=12, fontweight='bold'); ax3[1].legend(fontsize=10, loc='upper center'); ax3[1].grid(alpha=0.3, axis='y')
+ax3[1].annotate('hit fooled\n(noise, but in R)', xy=(1.18, hit_nR), xytext=(1.25, 0.55), fontsize=9,
+                ha='center', color='#b00020', arrowprops=dict(arrowstyle='->', color='#b00020'))
+plt.suptitle('Validation 3 — CS_struct agrees with an independent localization measure where it should, '
+             'and is stronger where they diverge', fontsize=12, fontweight='bold')
+plt.tight_layout(rect=[0,0,1,0.94]); out3='cs_viz_outputs/cs_v3_agreement_divergence.png'
+plt.savefig(out3, dpi=140, bbox_inches='tight'); plt.close(); print('saved', out3)
