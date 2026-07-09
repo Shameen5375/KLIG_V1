@@ -120,16 +120,12 @@ axc2 = fig2.add_subplot(gs2[0]); axc2.imshow(d_coh, cmap='RdBu_r', vmin=-vmax, v
 axc2.set_title(f'structured class-difference\ncoherence difference = {cd_coh:.2f}', fontsize=11, fontweight='bold', color='#b00020')
 axn2 = fig2.add_subplot(gs2[1]); axn2.imshow(d_noise, cmap='RdBu_r', vmin=-vmax, vmax=vmax); axn2.axis('off')
 axn2.set_title(f'noise class-difference\ncoherence difference = {cd_noise:.3f}', fontsize=11, fontweight='bold', color='#1f6fd6')
-txt2 = ('difference metrics:\n  SAME score  (fooled)\n\ncoherence difference:\n'
-        f'  {cd_coh:.2f}  vs  {cd_noise:.3f}\n  → separates them')
-axn2.text(1.05, 0.5, txt2, transform=axn2.transAxes, va='center', ha='left', fontsize=9, family='monospace',
-          bbox=dict(boxstyle='round', fc='#eafaea', ec='#4c9a4c'))
 axs2 = fig2.add_subplot(gs2[2])
-for j, (k, v) in enumerate(curves.items()):                                    # difference metrics, relative to a=0
-    axs2.plot(alphas, np.array(v)/(np.array(v)[0]+EPS), '-o', ms=3, color=cmap(j), alpha=0.55, label=f'{k} (difference)')
-axs2.plot(alphas, coh_curve/(coh_curve[0]+EPS), '-s', color='#127a12', lw=3, ms=5, label='coherence difference (proposed)')
+for j, (k, v) in enumerate(curves.items()):                                    # difference metrics ÷ random baseline
+    axs2.plot(alphas, np.array(v)/(rp[k]+EPS), '-o', ms=3, color=cmap(j), label=f'{k} (difference — flat)')
+axs2.plot(alphas, coh_curve/(coh_curve[0]+EPS), '-s', color='#127a12', lw=3.5, ms=6, label='coherence difference (proposed)')
 axs2.set_xlabel('α   (0 = pure structure  →  1 = pure noise),  energy held CONSTANT', fontsize=11)
-axs2.set_ylabel('score  (relative to α=0)', fontsize=11); axs2.set_ylim(-0.05, 1.15)
+axs2.set_ylabel('metric score  (normalized to [0,1])', fontsize=11); axs2.set_ylim(-0.05, 1.15)
 axs2.set_title('Coherence difference collapses on noise; difference metrics stay flat', fontsize=12, fontweight='bold')
 axs2.grid(alpha=0.3); axs2.legend(fontsize=9, loc='center left')
 fig2.suptitle('A coherence-difference metric is not gameable by noise.', fontsize=13.5, fontweight='bold')
