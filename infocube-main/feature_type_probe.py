@@ -59,7 +59,7 @@ def out_region(disc, labs, seg, area):                         # equal-area NON-
     return M
 
 # ── cue-specific perturbations (numpy, C,H,W) ──
-def smooth_warp(a, strength=35, sigma=10):
+def smooth_warp(a, strength=80, sigma=8):
     C, H, W = a.shape; yy, xx = np.mgrid[0:H, 0:W]
     dx = gaussian_filter(rng.standard_normal((H, W)), sigma) * strength
     dy = gaussian_filter(rng.standard_normal((H, W)), sigma) * strength
