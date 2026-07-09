@@ -90,3 +90,20 @@ plt.suptitle('CS_struct synthetic validation — recovers the planted coherence 
              fontsize=11.5, fontweight='bold')
 plt.tight_layout(rect=[0,0,1,0.93]); out='cs_viz_outputs/cs_synthetic_validation.png'
 plt.savefig(out, dpi=110, bbox_inches='tight'); plt.close(); print('saved', out)
+
+# ── standalone Validation-2 plot ─────────────────────────────────────────────────────────
+csn = cs_curves / (cs_curves.max(1, keepdims=True) + EPS)              # normalize each draw to [0,1]
+mn, sd = csn.mean(0), csn.std(0)
+figv, axv = plt.subplots(figsize=(7.2, 5.4), facecolor='white')
+for c in csn[::6]: axv.plot(alphas, c, color='#9ecb9e', alpha=0.22, lw=1)
+axv.plot(alphas, mn, '-o', color='#127a12', lw=3, ms=7, label=f'mean over {N_DRAWS} draws')
+axv.fill_between(alphas, mn-sd, mn+sd, color='#127a12', alpha=0.15, label='±1 SD across draws')
+axv.set_xlabel('planted coherence level  (0 = pure noise  →  1 = pure structure)', fontsize=11)
+axv.set_ylabel('CS_struct  (per-draw normalized)', fontsize=11)
+axv.set_title('CS_struct recovers the planted coherence ranking', fontsize=13, fontweight='bold')
+axv.text(0.035, 0.90, f'Spearman ρ(planted, CS_struct) = {rho_m:.3f} ± {rho_se:.3f}\n'
+         f'every one of {N_DRAWS} draws:  ρ = 1.00', transform=axv.transAxes, fontsize=10.5,
+         va='top', ha='left', bbox=dict(boxstyle='round', fc='#eafaea', ec='#4c9a4c'))
+axv.grid(alpha=0.3); axv.legend(fontsize=10, loc='lower right'); axv.set_ylim(-0.03, 1.05)
+plt.tight_layout(); outv='cs_viz_outputs/cs_v2_rank_recovery.png'
+plt.savefig(outv, dpi=140, bbox_inches='tight'); plt.close(); print('saved', outv)
