@@ -1,11 +1,15 @@
-"""Cue ablation for CLASS SENSITIVITY — which cue (texture/edge/shape) carries the y1-vs-y2
-DISCRIMINATIVE signal inside the discriminative region R?
+"""EXPERIMENT 2 — Cue ablation (texture / edge / shape): which cue carries the y1-vs-y2
+class-DISCRIMINATIVE signal inside the discriminative region R?
 
-We measure the collapse of the class DIFFERENTIAL d1-d2 (how differently the two classes rely
-on R), not the top-1 confidence.  Cue removals are applied ONLY inside R; an R-specific control
-(same removal on a random region of equal size) is subtracted to remove global perturbation
-leakage.  Run for ResNet50 and ViT-B/16.
-Run:  .venv/Scripts/python cue_class_sens.py [n]   (default 30)
+Quantity measured: COLLAPSE of the class differential d1-d2 (NOT drift of CS_struct — that is
+Experiment 1, augment_consistency.py; the two experiments are fully separate).
+  - cue removals applied ONLY inside R: texture=median(5), edge=gaussian(4), shape=smooth warp
+    (elastic; tile-shuffle is banned — it injects seam edges)
+  - R-specific control: same op on a random equal-size region OUTSIDE R, subtracted
+  - sanity check runs FIRST: edge energy retained per op, measured on the eroded interior of R
+    (shape must be ~100%, never >100% — >100% means the op injects edges and is invalid)
+  - ResNet50 and ViT-B/16, each with its own top-1/top-2; requires n >= 50
+Run:  .venv/Scripts/python cue_class_sens.py [n]   (default 30; add --smoke to allow small n)
 """
 import sys, pickle, warnings
 try: sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -82,38 +86,68 @@ def smooth_warp(img, rng, strength=15, sigma=8):
     crd = [np.clip(yy+dy,0,H-1), np.clip(xx+dx,0,W-1)]
     return np.stack([map_coordinates(img[c], crd, order=1, mode='reflect') for c in range(3)])
 def remove_shape(img, Rb, rng): return blend(img, smooth_warp(img, rng), Rb)   # deform, no new edges
-def photometric(img):                                                          # label-preserving jitter (NULL)
-    im01 = np.clip(img*_std + _mean, 0, 1)
-    im01 = np.clip(im01*1.2, 0, 1); im01 = np.clip((im01-0.5)*1.3 + 0.5, 0, 1) # brightness + contrast
-    return (im01 - _mean)/_std
-def remove_null(img, Rb): return blend(img, photometric(img), Rb)              # keeps texture/edge/shape intact
-CUES = ['texture','edge','shape','null']                                       # 'null' = augmentation control
-CUE_LABEL = {'texture':'texture','edge':'edge','shape':'shape','null':'null\n(augment)'}
+CUES = ['texture','edge','shape']
+CUE_LABEL = {'texture':'texture','edge':'edge','shape':'shape'}
+def apply_cue(name, img, Rb, rng):
+    if name=='texture': return remove_texture(img, Rb)
+    if name=='edge':    return remove_edge(img, Rb)
+    return remove_shape(img, Rb, rng)
+
+# ── sanity check (run FIRST): each op removes only its target cue ────────────────────────
+from scipy.ndimage import binary_erosion
+def edge_energy(img, Rb):
+    """edge energy in the ERODED interior of R (excludes the 3px blend seam every op shares)."""
+    Ri = binary_erosion(Rb, iterations=3)
+    g = np.zeros(img.shape[1:])
+    for c in range(3):
+        gy, gx = np.gradient(img[c]); g += gx**2 + gy**2
+    return float(g[Ri].sum())
+def sanity_check(imgs_Rb, rng):
+    print('[sanity] edge energy retained inside R per op (texture~high, edge~low, shape~100 not >100):')
+    ok = True
+    for name in CUES:
+        r = [edge_energy(apply_cue(name, im, Rb, rng), Rb)/ (edge_energy(im, Rb)+EPS) for im, Rb in imgs_Rb]
+        m = float(np.mean(r)); print(f'   {name:8s} retained = {100*m:6.1f}%')
+        if name=='shape' and m > 1.05: ok=False; print('   [FAIL] shape op INJECTS edges (>100%) — fix before trusting results')
+        if name=='edge' and m > 0.6:  ok=False; print('   [WARN] edge op does not sufficiently remove edges')
+    return ok
 
 def cue_collapse(model, x_np, Rb, y1, y2, rng):
     base = class_differential(model, x_np, Rb, y1, y2)
     out = {}
     for name in CUES:
-        if name=='texture': xr = remove_texture(x_np, Rb)
-        elif name=='edge':  xr = remove_edge(x_np, Rb)
-        elif name=='shape': xr = remove_shape(x_np, Rb, rng)
-        else:               xr = remove_null(x_np, Rb)
-        new = class_differential(model, xr, Rb, y1, y2)
+        new = class_differential(model, apply_cue(name, x_np, Rb, rng), Rb, y1, y2)
         out[name] = float(np.clip(1 - abs(new)/(abs(base)+EPS), 0.0, 1.0))     # fraction of differential lost [0,1]
     return out, abs(base)
 
+def region_outside(Rb, rng, max_try=20):
+    """random equal-size region OUTSIDE R (reject rolls that overlap R >20%)."""
+    for _ in range(max_try):
+        dy, dx = int(rng.integers(30,190)), int(rng.integers(30,190))
+        Rr = np.roll(Rb, (dy,dx), axis=(0,1))
+        if (Rr & Rb).sum() / (Rb.sum()+EPS) < 0.2: return Rr
+    return Rr
+
 def cue_class_sens_Rspecific(model, x_np, Rb, y1, y2, rng):
     inR, base_mag = cue_collapse(model, x_np, Rb, y1, y2, rng)
-    # random region of EQUAL size: roll the region mask to a random location
-    dy, dx = int(rng.integers(40,180)), int(rng.integers(40,180))
-    Rrand = np.roll(Rb, (dy,dx), axis=(0,1))
-    outR, _ = cue_collapse(model, x_np, Rrand, y1, y2, rng)
-    return {k: inR[k]-outR[k] for k in CUES}, base_mag
+    outR, _ = cue_collapse(model, x_np, region_outside(Rb, rng), y1, y2, rng)
+    return {k: inR[k]-outR[k] for k in CUES}, base_mag                          # inside-minus-outside
 
 # ── run both architectures ───────────────────────────────────────────────────────────────
 pool = pickle.load(open('cs_viz_cache/pool1000_balanced.pkl','rb'))[:N]
 def img_of(d): x=d['x']; return (x.squeeze(0) if x.dim()==4 else x)
-print(f'[setup] cue class-sensitivity | {len(pool)} images | {DEVICE}')
+assert N >= 50 or '--smoke' in sys.argv, 'Experiment 2 must run at n >= 50 (pass --smoke to override for testing)'
+print(f'[setup] EXPERIMENT 2 — cue ablation (collapse of class-differential) | {len(pool)} images | {DEVICE}')
+
+# sanity check FIRST (pure image ops, no model): each removal targets only its cue
+_rng0 = np.random.default_rng(0)
+_sanity_pairs = []
+for d in pool[:6]:
+    x = img_of(d); xn = x.numpy()
+    cy, cx = _rng0.integers(60,160), _rng0.integers(60,160)
+    Rb0 = (np.add.outer((np.arange(224)-cy)**2, (np.arange(224)-cx)**2) < 45**2)
+    _sanity_pairs.append((xn, Rb0))
+if not sanity_check(_sanity_pairs, _rng0): sys.exit('[sanity] FAILED — aborting')
 
 from torchvision.models import resnet50, ResNet50_Weights, vit_b_16, ViT_B_16_Weights
 ARCHS = {'ResNet50': lambda: resnet50(weights=ResNet50_Weights.IMAGENET1K_V2),
@@ -158,8 +192,8 @@ for j, arch in enumerate(stats):
 ax.axhline(0, color='#888', lw=0.8)
 ax.set_xticks(xx); ax.set_xticklabels([CUE_LABEL[c] for c in CUES], fontsize=11)
 ax.set_ylabel('collapse of class differential  (R-specific)\nfraction of y1-vs-y2 signal that cue carries', fontsize=10.5)
-ax.set_title('Which cue carries the class-discriminative signal?\ncue removed inside R; R-specific control · null = label-preserving jitter (should not collapse)',
-             fontsize=11, fontweight='bold')
+ax.set_title('Which cue carries the class-discriminative signal?\ncue removed inside R; R-specific control subtracted',
+             fontsize=12, fontweight='bold')
 ax.legend(fontsize=10); ax.grid(alpha=0.3, axis='y')
 plt.tight_layout(); out='cs_viz_outputs/cue_class_sens.png'
 plt.savefig(out, dpi=150, bbox_inches='tight'); plt.close(); print('saved', out)
@@ -169,8 +203,7 @@ import pandas as pd
 archs = list(stats)
 df = pd.DataFrame([{'cue': c, **{a: stats[a][c][0] for a in archs}} for c in CUES])
 df.to_csv('cs_viz_outputs/cue_class_sens.csv', index=False)
-REAL = ['texture','edge','shape']                                           # 'null' is the control, not a winner
-dom = {a: REAL[int(np.argmax([stats[a][c][0] for c in REAL]))] for a in archs}
+dom = {a: CUES[int(np.argmax([stats[a][c][0] for c in CUES]))] for a in archs}
 n_used = {a: sum(abs(r['base'])>0.02 for r in results[a]) for a in archs}
 figt, axt = plt.subplots(figsize=(8.2, 2.4), facecolor='white'); axt.axis('off')
 cells = [[c] + [f'{stats[a][c][0]:+.3f} ± {stats[a][c][1]:.3f}' for a in archs] for c in CUES]
