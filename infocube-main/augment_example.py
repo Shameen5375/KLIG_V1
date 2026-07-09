@@ -76,7 +76,10 @@ def compute(x,y1,y2,x_cf):
     cs=cs_struct_gated(A1,A2,region)
     D=(A1-A2)*region; D=D/(np.abs(D).max()+EPS)
     coh=gaussian_filter(D,4)                                   # the coherence map CS_struct scores
-    return dict(cs=cs, region=region, D=D, coh=coh, top=int(model(x.unsqueeze(0))[0].argmax()))
+    import torch.nn.functional as _F
+    pr = _F.softmax(model(x.unsqueeze(0))[0], 0); t2 = pr.topk(2).indices.tolist()
+    return dict(cs=cs, region=region, D=D, coh=coh, top=int(t2[0]),
+                t1=int(t2[0]), p1=float(pr[t2[0]]), t2c=int(t2[1]), p2=float(pr[t2[1]]))
 
 def denorm(x): return (x*_std.to(x.device)+_mean.to(x.device)).clamp(0,1)
 def renorm(i): return (i-_mean.to(i.device))/_std.to(i.device)
@@ -105,7 +108,7 @@ for d in CANDS:
     c=int(d['high_cls'][0])
     if c in used: continue
     used.add(c); sel.append(d)
-    if len(sel)>=60: break
+    if len(sel)>=100: break                            # match augment_consistency n=100 cache
 cf_by={}
 for d in CANDS: cf_by.setdefault(int(d['high_cls'][0]), d['x'])
 
@@ -116,9 +119,13 @@ if idx is None and Path('cs_viz_cache/augment_consistency.pkl').exists():
     rows=pickle.load(open('cs_viz_cache/augment_consistency.pkl','rb'))
     drift=[np.mean([abs(t['cs']-r['cs0']) for t in r['transforms'].values()]) for r in rows]
     med=np.median(drift)
-    cand=[(abs(drift[i]-med), i) for i,r in enumerate(rows)
-          if all(t['pred_preserved'] for t in r['transforms'].values()) and r['cs0']>0.06]
-    idx=min(cand)[1] if cand else int(np.argmin([abs(d-med) for d in drift]))
+    mean_drift=np.mean([np.mean([abs(t['cs']-r['cs0']) for t in r['transforms'].values()]) for r in rows])
+    mean_cs=np.mean([r['cs0'] for r in rows])
+    # representative of the AGGREGATE stability result: drift near population mean AND cs0 near mean;
+    # require top-1 preserved on >=4/5 transforms; exclude prior example (20)
+    cand=sorted((abs(drift[i]-mean_drift)+abs(rows[i]['cs0']-mean_cs), i) for i,r in enumerate(rows)
+          if sum(t['pred_preserved'] for t in r['transforms'].values())>=4 and r['cs0']>0.06 and i!=20)
+    idx=cand[0][1] if cand else int(np.argmin([abs(d-med) for d in drift]))
 idx = idx if idx is not None else 0
 d=sel[idx]; x0=d['x'].to(DEVICE); y1,y2=int(d['high_cls'][0]),int(d['high_cls'][1])
 xcf=(cf_by.get(y2,CANDS[0]['x'])).to(DEVICE)
@@ -132,6 +139,9 @@ for r,name in enumerate(names):
     ax[r,0].text(-0.12,0.5,f"{name}\nCS={res['cs']:.3f}", transform=ax[r,0].transAxes, rotation=90,
                  va='center', ha='center', fontsize=10, fontweight='bold',
                  color='#b00020' if name=='original' else 'black')
+    ax[r,0].text(0.5,-0.03, f"top-1: {cats[res['t1']].split(',')[0]} (p={res['p1']:.2f})   "
+                 f"top-2: {cats[res['t2c']].split(',')[0]} (p={res['p2']:.2f})",
+                 transform=ax[r,0].transAxes, ha='center', va='top', fontsize=8)
     # region R as bright outline + light fill on image
     ax[r,1].imshow(im)
     ax[r,1].contourf(res['region'], levels=[0.5,1.5], colors=['#00bfff'], alpha=0.28)
