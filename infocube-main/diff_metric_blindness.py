@@ -95,7 +95,7 @@ axn.text(1.05, 0.5, txt, transform=axn.transAxes, va='center', ha='left', fontsi
          bbox=dict(boxstyle='round', fc='#f5f5f5', ec='#999'))
 axs = fig.add_subplot(gs[2])
 plot_diff(axs)
-axs.axhline(1.0, color='k', ls='--', lw=1.8, label='independent random-pair baseline')
+axs.axhline(1.0, color='k', ls='--', lw=1.8, label='random-pair baseline')
 axs.set_xlabel('α   (0 = pure structure  →  1 = pure noise)', fontsize=11)
 axs.set_ylabel('difference score / random-pair baseline', fontsize=11); axs.set_ylim(0, 1.15)
 axs.set_title('Constant-energy sweep', fontsize=12, fontweight='bold')
@@ -130,8 +130,8 @@ axc2.set_title('structured class-difference', fontsize=11, fontweight='bold', co
 axn2 = fig2.add_subplot(gs2[1]); axn2.imshow(d_noise, cmap='RdBu_r', vmin=-vmax, vmax=vmax); axn2.axis('off')
 axn2.set_title('noise class-difference\n(identical energy)', fontsize=11, fontweight='bold', color='#1f6fd6')
 axs2 = fig2.add_subplot(gs2[2])
-plot_diff(axs2, suffix=' (difference — flat)')                                  # merges coincident cosine/corr
-axs2.plot(alphas, coh_curve/(coh_curve[0]+EPS), '-s', color='#127a12', lw=3.5, ms=6, label='coherence difference (proposed)')
+plot_diff(axs2)                                  # merges coincident cosine/corr
+axs2.plot(alphas, coh_curve/(coh_curve[0]+EPS), '-s', color='#127a12', lw=3.5, ms=6, label='coherence difference')
 axs2.set_xlabel('α   (0 = pure structure  →  1 = pure noise)', fontsize=11)
 axs2.set_ylabel('metric score  (normalized to [0,1])', fontsize=11); axs2.set_ylim(-0.05, 1.15)
 axs2.set_title('Constant-energy sweep', fontsize=12, fontweight='bold')
