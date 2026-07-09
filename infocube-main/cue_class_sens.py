@@ -82,7 +82,13 @@ def smooth_warp(img, rng, strength=15, sigma=8):
     crd = [np.clip(yy+dy,0,H-1), np.clip(xx+dx,0,W-1)]
     return np.stack([map_coordinates(img[c], crd, order=1, mode='reflect') for c in range(3)])
 def remove_shape(img, Rb, rng): return blend(img, smooth_warp(img, rng), Rb)   # deform, no new edges
-CUES = ['texture','edge','shape']
+def photometric(img):                                                          # label-preserving jitter (NULL)
+    im01 = np.clip(img*_std + _mean, 0, 1)
+    im01 = np.clip(im01*1.2, 0, 1); im01 = np.clip((im01-0.5)*1.3 + 0.5, 0, 1) # brightness + contrast
+    return (im01 - _mean)/_std
+def remove_null(img, Rb): return blend(img, photometric(img), Rb)              # keeps texture/edge/shape intact
+CUES = ['texture','edge','shape','null']                                       # 'null' = augmentation control
+CUE_LABEL = {'texture':'texture','edge':'edge','shape':'shape','null':'null\n(augment)'}
 
 def cue_collapse(model, x_np, Rb, y1, y2, rng):
     base = class_differential(model, x_np, Rb, y1, y2)
@@ -90,7 +96,8 @@ def cue_collapse(model, x_np, Rb, y1, y2, rng):
     for name in CUES:
         if name=='texture': xr = remove_texture(x_np, Rb)
         elif name=='edge':  xr = remove_edge(x_np, Rb)
-        else:               xr = remove_shape(x_np, Rb, rng)
+        elif name=='shape': xr = remove_shape(x_np, Rb, rng)
+        else:               xr = remove_null(x_np, Rb)
         new = class_differential(model, xr, Rb, y1, y2)
         out[name] = float(np.clip(1 - abs(new)/(abs(base)+EPS), 0.0, 1.0))     # fraction of differential lost [0,1]
     return out, abs(base)
@@ -149,10 +156,10 @@ for j, arch in enumerate(stats):
     m = [stats[arch][c][0] for c in CUES]; se = [stats[arch][c][1] for c in CUES]
     ax.bar(xx + (j-0.5)*w, m, w, yerr=se, capsize=3, color=colors.get(arch,'#888'), alpha=0.88, label=arch)
 ax.axhline(0, color='#888', lw=0.8)
-ax.set_xticks(xx); ax.set_xticklabels(['texture','edge','shape'], fontsize=11)
+ax.set_xticks(xx); ax.set_xticklabels([CUE_LABEL[c] for c in CUES], fontsize=11)
 ax.set_ylabel('collapse of class differential  (R-specific)\nfraction of y1-vs-y2 signal that cue carries', fontsize=10.5)
-ax.set_title('Which cue carries the class-discriminative signal?\ncue removed inside R; R-specific control subtracted',
-             fontsize=12, fontweight='bold')
+ax.set_title('Which cue carries the class-discriminative signal?\ncue removed inside R; R-specific control · null = label-preserving jitter (should not collapse)',
+             fontsize=11, fontweight='bold')
 ax.legend(fontsize=10); ax.grid(alpha=0.3, axis='y')
 plt.tight_layout(); out='cs_viz_outputs/cue_class_sens.png'
 plt.savefig(out, dpi=150, bbox_inches='tight'); plt.close(); print('saved', out)
@@ -162,7 +169,8 @@ import pandas as pd
 archs = list(stats)
 df = pd.DataFrame([{'cue': c, **{a: stats[a][c][0] for a in archs}} for c in CUES])
 df.to_csv('cs_viz_outputs/cue_class_sens.csv', index=False)
-dom = {a: CUES[int(np.argmax([stats[a][c][0] for c in CUES]))] for a in archs}
+REAL = ['texture','edge','shape']                                           # 'null' is the control, not a winner
+dom = {a: REAL[int(np.argmax([stats[a][c][0] for c in REAL]))] for a in archs}
 n_used = {a: sum(abs(r['base'])>0.02 for r in results[a]) for a in archs}
 figt, axt = plt.subplots(figsize=(8.2, 2.4), facecolor='white'); axt.axis('off')
 cells = [[c] + [f'{stats[a][c][0]:+.3f} ± {stats[a][c][1]:.3f}' for a in archs] for c in CUES]
