@@ -1,0 +1,12 @@
+rank,method,gated_CSstruct,SE
+1,KL-IG² (adaptive),0.1075,0.0079
+2,KL-IG²,0.0710,0.0033
+3,KL-IG (linear),0.0247,0.0008
+4,KLIG-Adaptive,0.0234,0.0008
+5,SmoothGrad,0.0147,0.0004
+6,ExpGrad,0.0130,0.0003
+7,Guided IG,0.0070,0.0001
+8,Blur-IG,0.0059,0.0002
+9,IG-zero,0.0055,0.0001
+10,IDG,0.0044,0.0001
+11,Vanilla Grad,0.0030,0.0001
